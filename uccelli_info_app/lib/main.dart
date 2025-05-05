@@ -3,43 +3,48 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-// Firebase core & messaging
+// Firebase Core & Messaging
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'firebase_options.dart';
 
-// Hive (for your post cache) and your services/providers
+// Hive for local cache
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:uccelli_info_app/services/post_cache_service.dart';
-import 'package:uccelli_info_app/providers/theme_provider.dart';
-import 'package:uccelli_info_app/providers/favorites_provider.dart';
+import 'services/post_cache_service.dart';
 
-import 'package:uccelli_info_app/pages/splash_screen.dart';
+// Push-notification setup
+import 'services/push_notification_service.dart';
 
-// 1️⃣ Background message handler
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Re-initialize Firebase in the background isolate
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  debugPrint('📥 [bg] Message received: ${message.messageId}');
+// State providers
+import 'providers/theme_provider.dart';
+import 'providers/favorites_provider.dart';
+
+// Entry page
+import 'pages/splash_screen.dart';
+
+/// Background FCM handler
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage msg) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  debugPrint('📥 [bg] ${msg.notification?.title}');
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 2️⃣ Init Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // 1️⃣ Init Firebase
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // 3️⃣ Register background FCM handler
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // 4️⃣ Init Hive & open your cache box
+  // 2️⃣ Init Hive & open cache box
   await Hive.initFlutter();
   await Hive.openBox(PostCacheService.postsBoxName);
 
+  // 3️⃣ Init local notifications + FCM listeners
+  await PushNotificationService.init();
+
+  // 4️⃣ Register background handler
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // 5️⃣ Run the app
   runApp(
     MultiProvider(
       providers: [
@@ -51,64 +56,68 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  late final FirebaseMessaging _messaging;
-
-  @override
-  void initState() {
-    super.initState();
-    _messaging = FirebaseMessaging.instance;
-
-    // 5️⃣ Request permission (iOS & Android 13+)
-    _messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    ).then((settings) {
-      debugPrint('🔔 Permission granted: ${settings.authorizationStatus}');
-    });
-
-    // 6️⃣ Get and print the FCM token
-    _messaging.getToken().then((token) {
-      debugPrint('📲 FCM Token: $token');
-      // TODO: send this token to your server if you want server‐driven pushes
-    });
-
-    // 7️⃣ Handle messages in foreground
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint('📥 [fg] Message received: ${message.messageId}');
-      if (message.notification != null) {
-        debugPrint('🔔 Notification: ${message.notification!.title}');
-        // TODO: display an in‐app banner or local notification here
-      }
-    });
-
-    // 8️⃣ Handle taps on notifications (when app is backgrounded)
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      debugPrint('🚀 [opened_app] via notification: ${message.notification?.title}');
-      // TODO: navigate to a particular screen based on message.data
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final themeProv = Provider.of<ThemeProvider>(context);
+
+    // Your brand & accent colors
+    const primary   = Color(0xFFDFBF8F);
+    const greyAcc   = Color(0xFF6A6A6A);
+    const darkBg    = Color(0xFF252525);
+
+    // Minimal light theme overrides
+    final light = ThemeData(
+      brightness: Brightness.light,
+      primaryColor: primary,
+      scaffoldBackgroundColor: Colors.white,
+      cardColor: Colors.white,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: primary,
+        foregroundColor: Colors.white,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: greyAcc),
+        ),
+      ),
+      colorScheme: ColorScheme.fromSwatch(accentColor: greyAcc),
+    );
+
+    // Minimal dark theme overrides
+    final dark = ThemeData(
+      brightness: Brightness.dark,
+      primaryColor: primary,
+      scaffoldBackgroundColor: darkBg,
+      cardColor: darkBg,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: darkBg,
+        foregroundColor: Colors.white,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: darkBg.withOpacity(.2),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: greyAcc),
+        ),
+      ),
+      colorScheme: ColorScheme.fromSwatch(
+        brightness: Brightness.dark,
+        accentColor: greyAcc,
+      ),
+    );
 
     return MaterialApp(
       title: 'Uccelli Society',
       debugShowCheckedModeBanner: false,
-      themeMode: themeProvider.themeMode,
-
-      // Copy in your existing theme definitions here:
-      theme: ThemeData( /* your light theme */ ),
-      darkTheme: ThemeData( /* your dark theme */ ),
-
+      themeMode: themeProv.themeMode,
+      theme: light,
+      darkTheme: dark,
       home: const SplashScreen(),
     );
   }

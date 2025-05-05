@@ -2,20 +2,24 @@
 
 plugins {
     id("com.android.application")
+    id("com.google.gms.google-services")    // Firebase Google Services plugin
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
-    // ↓ Apply the Google Services plugin
-    id("com.google.gms.google-services")
 }
 
 android {
     namespace = "com.example.uccelli_info_app"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+
+    // Match the NDK version required by all plugins
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+
+        // Enable core‐library desugaring (Java 8+ APIs)
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -32,16 +36,20 @@ android {
 
     buildTypes {
         release {
+            // Using debug signing config for now
             signingConfig = signingConfigs.getByName("debug")
         }
     }
 }
 
-// ↓ Add the Firebase Messaging dependency
-dependencies {
-    implementation("com.google.firebase:firebase-messaging:23.1.2")
-}
-
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Your other dependencies…
+    // …
+
+    // Updated desugaring library (>= 1.2.2 required by flutter_local_notifications)
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.2.2")
 }
