@@ -1,3 +1,5 @@
+// lib/pages/settings_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -63,66 +65,98 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final primaryColor = Theme.of(context).primaryColor;
 
     return Scaffold(
-      appBar: customAppBar(context, title: 'Settings'),
-      body: ListView(padding: const EdgeInsets.all(8), children: [
-        SwitchListTile(
-          title: const Text('Dark Mode'),
-          value: themeProvider.isDarkMode,
-          onChanged: (_) => themeProvider.toggleTheme(),
-        ),
-        SwitchListTile(
-          title: const Text('Enable Notifications'),
-          value: notificationsEnabled,
-          onChanged: _setNotifications,
-        ),
-        const Divider(),
-        ListTile(
-          leading: const Icon(Icons.delete_sweep),
-          title: const Text('Clear Favorites'),
-          subtitle: const Text('Remove all bookmarked posts'),
-          onTap: _clearFavorites,
-        ),
-        const Divider(),
-        ListTile(
-          leading: const Icon(Icons.star_rate),
-          title: const Text('Rate this App'),
-          onTap: () => _openUrl('https://example.com/appstore'),
-        ),
-        ListTile(
-          leading: const Icon(Icons.share),
-          title: const Text('Share this App'),
-          onTap: () => Share.share(
-            'Check out Uccelli Society Info App!\nhttps://example.com/download',
+      appBar: customAppBar(
+        context,
+        title: 'Settings',
+        showBack: true,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(8),
+        children: [
+
+          // ─── Dark Mode Toggle ─────────────────────────────────────
+          SwitchListTile(
+            title: const Text('Dark Mode'),
+            value: themeProvider.isDarkMode,
+            activeColor: primaryColor,                       // thumb when ON
+            activeTrackColor: primaryColor.withOpacity(0.5), // track when ON
+            inactiveThumbColor: Colors.grey,                 // thumb when OFF
+            inactiveTrackColor: Colors.grey.withOpacity(0.4),// track when OFF
+            onChanged: (_) => themeProvider.toggleTheme(),
           ),
-        ),
-        const Divider(),
-        ListTile(
-          leading: const Icon(Icons.feedback_outlined),
-          title: const Text('Send Feedback'),
-          onTap: () => launchUrl(Uri.parse(
-              'mailto:uccelli.society@gmail.com?subject=App Feedback')),
-        ),
-        ListTile(
-          leading: const Icon(Icons.bug_report),
-          title: const Text('Report a Bug'),
-          onTap: () => launchUrl(Uri.parse(
-              'mailto:uccelli.society@gmail.com?subject=Bug Report')),
-        ),
-        const Divider(),
-        ListTile(
-          leading: const Icon(Icons.info_outline),
-          title: const Text('About'),
-          subtitle: Text('Version $version'),
-          onTap: () => showAboutDialog(
-            context: context,
-            applicationName: 'Uccelli Society Info App',
-            applicationVersion: version,
-            applicationLegalese: '© 2025 Uccelli Society',
+
+          // ─── Notifications Toggle ───────────────────────────────
+          SwitchListTile(
+            title: const Text('Enable Notifications'),
+            value: notificationsEnabled,
+            activeColor: primaryColor,
+            activeTrackColor: primaryColor.withOpacity(0.5),
+            inactiveThumbColor: Colors.grey,
+            inactiveTrackColor: Colors.grey.withOpacity(0.4),
+            onChanged: _setNotifications,
           ),
-        ),
-      ]),
+
+          const Divider(),
+
+          ListTile(
+            leading: const Icon(Icons.delete_sweep),
+            title: const Text('Clear Favorites'),
+            subtitle: const Text('Remove all bookmarked posts'),
+            onTap: _clearFavorites,
+          ),
+
+          const Divider(),
+
+          ListTile(
+            leading: const Icon(Icons.star_rate),
+            title: const Text('Rate this App'),
+            onTap: () => _openUrl('https://example.com/appstore'),
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.share),
+            title: const Text('Share this App'),
+            onTap: () => Share.share(
+              'Check out Uccelli Society Info App!\nhttps://example.com/download',
+            ),
+          ),
+
+          const Divider(),
+
+          ListTile(
+            leading: const Icon(Icons.feedback_outlined),
+            title: const Text('Send Feedback'),
+            onTap: () => launchUrl(
+              Uri.parse('mailto:uccelli.society@gmail.com?subject=App Feedback'),
+            ),
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.bug_report),
+            title: const Text('Report a Bug'),
+            onTap: () => launchUrl(
+              Uri.parse('mailto:uccelli.society@gmail.com?subject=Bug Report'),
+            ),
+          ),
+
+          const Divider(),
+
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text('About'),
+            subtitle: Text('Version $version'),
+            onTap: () => showAboutDialog(
+              context: context,
+              applicationName: 'Uccelli Society Info App',
+              applicationVersion: version,
+              applicationLegalese: '© 2025 Uccelli Society',
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

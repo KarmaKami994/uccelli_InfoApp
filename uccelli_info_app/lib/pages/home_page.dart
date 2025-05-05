@@ -46,10 +46,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final themeProvider     = Provider.of<ThemeProvider>(context);
     final favoritesProvider = Provider.of<FavoritesProvider>(context);
-    final isDarkMode = themeProvider.isDarkMode;
-    const cardMargin = EdgeInsets.symmetric(horizontal: 16, vertical: 8);
+    final isDarkMode        = themeProvider.isDarkMode;
+    const cardMargin        = EdgeInsets.symmetric(horizontal: 16, vertical: 8);
 
     return DefaultTabController(
       length: 2,

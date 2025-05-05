@@ -4,18 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 
+/// A custom AppBar that shows either a logo or a back arrow.
+///
+/// If [showBack] is true, displays a back arrow; otherwise shows your logo.
 PreferredSizeWidget customAppBar(
   BuildContext context, {
   required String title,
   List<Widget>? actions,
-  PreferredSizeWidget? bottom,             // ← add this
+  PreferredSizeWidget? bottom,
+  bool showBack = false,
 }) {
   final themeProvider = Provider.of<ThemeProvider>(context);
   final isDark = themeProvider.isDarkMode;
-  final canPop = Navigator.of(context).canPop();
 
   return AppBar(
-    leading: canPop
+    automaticallyImplyLeading: false,
+    leading: showBack
         ? IconButton(
             icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
             onPressed: () => Navigator.of(context).pop(),
@@ -29,12 +33,13 @@ PreferredSizeWidget customAppBar(
               fit: BoxFit.contain,
             ),
           ),
-
-    title: Text(title, style: Theme.of(context).appBarTheme.titleTextStyle),
+    title: Text(
+      title,
+      style: Theme.of(context).appBarTheme.titleTextStyle,
+    ),
     actions: actions,
     backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
     elevation: Theme.of(context).appBarTheme.elevation,
-
-    bottom: bottom,                         // ← pass it through
+    bottom: bottom,
   );
 }
