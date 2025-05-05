@@ -2,7 +2,7 @@
 
 plugins {
     id("com.android.application")
-    id("com.google.gms.google-services")    // Firebase Google Services plugin
+    id("com.google.gms.google-services")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -11,14 +11,14 @@ android {
     namespace = "com.example.uccelli_info_app"
     compileSdk = flutter.compileSdkVersion
 
-    // Match the NDK version required by all plugins
+    // Align NDK with your plugins' requirements
     ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
 
-        // Enable core‐library desugaring (Java 8+ APIs)
+        // Enable core‐library desugaring for Java 8+ APIs
         isCoreLibraryDesugaringEnabled = true
     }
 
@@ -34,11 +34,30 @@ android {
         versionName = flutter.versionName
     }
 
-    buildTypes {
-        release {
-            // Using debug signing config for now
-            signingConfig = signingConfigs.getByName("debug")
+    signingConfigs {
+        create("release") {
+            // ← configure your keystore here if you have one
+            // storeFile = file("/path/to/your/keystore.jks")
+            // storePassword = "..."
+            // keyAlias = "..."
+            // keyPassword = "..."
         }
+    }
+
+    buildTypes {
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
+
+            // Code shrinking (R8) and resource shrinking
+            isMinifyEnabled    = true
+            isShrinkResources  = true
+
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+        // debug can remain default
     }
 }
 
@@ -47,9 +66,8 @@ flutter {
 }
 
 dependencies {
-    // Your other dependencies…
-    // …
+    // … your other dependencies …
 
-    // Updated desugaring library (>= 1.2.2 required by flutter_local_notifications)
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.2.2")
+    // Core‐library desugaring for Java 8+ APIs
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
