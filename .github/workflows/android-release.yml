@@ -3,8 +3,8 @@ name: '📦 Build & Archive Release APK'
 on:
   push:
     tags:
-      - 'v*'
-  workflow_dispatch:
+      - 'v*'            # on git tags like v1.0.2
+  workflow_dispatch:   # also allow manual runs
 
 jobs:
   build-release:
@@ -44,7 +44,7 @@ jobs:
         run: flutter build apk --release
 
       - name: Archive APK
-        uses: actions/upload-artifact@v3     # <— use the v3 tag here
+        uses: actions/upload-artifact@v2
         with:
           name: uccelli-release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
