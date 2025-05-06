@@ -3,8 +3,8 @@ name: '📦 Build & Release APK'
 on:
   push:
     tags:
-      - 'v*'
-  workflow_dispatch:
+      - 'v*'                # e.g. v1.2.3
+  workflow_dispatch:       # manual trigger
 
 jobs:
   build-and-release:
@@ -47,15 +47,17 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         with:
-          tag_name: ${{ github.ref_name }}
+          token:        ${{ secrets.GITHUB_TOKEN }}
+          tag_name:     ${{ github.ref_name }}
           release_name: Release ${{ github.ref_name }}
-          draft: false
-          prerelease: false
+          draft:        false
+          prerelease:   false
 
       - name: Upload APK to GitHub Release
         uses: actions/upload-release-asset@v1
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: uccelli_info_app/build/app/outputs/flutter-apk/app-release.apk
-          asset_name: uccelli-info-app-${{ github.ref_name }}.apk
-          asset_content_type: application/vnd.android.package-archive
+          token:               ${{ secrets.GITHUB_TOKEN }}
+          upload_url:          ${{ steps.create_release.outputs.upload_url }}
+          asset_path:          uccelli_info_app/build/app/outputs/flutter-apk/app-release.apk
+          asset_name:          uccelli-info-app-${{ github.ref_name }}.apk
+          asset_content_type:  application/vnd.android.package-archive
