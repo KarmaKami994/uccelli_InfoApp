@@ -19,11 +19,11 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Set up Java 11
+      - name: Set up Java 17
         uses: actions/setup-java@v3
         with:
           distribution: temurin
-          java-version: '11'
+          java-version: '17'
 
       - name: Set up Flutter (stable channel)
         uses: subosito/flutter-action@v1
@@ -34,18 +34,6 @@ jobs:
         run: |
           mkdir -p android/app
           echo "$JKS_BASE64" | base64 --decode > android/app/uccelli-release.jks
-
-      - name: Accept Android SDK licenses
-        run: |
-          # Try the new cmdline-tools path first
-          if [ -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
-            yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_SDK_ROOT" --licenses
-          # Fallback to the legacy tools path
-          elif [ -x "$ANDROID_SDK_ROOT/tools/bin/sdkmanager" ]; then
-            yes | "$ANDROID_SDK_ROOT/tools/bin/sdkmanager" --licenses
-          else
-            echo "sdkmanager not found, skipping license acceptance"
-          fi
 
       - name: Get Flutter dependencies
         run: flutter pub get
