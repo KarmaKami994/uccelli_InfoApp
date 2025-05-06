@@ -1,16 +1,19 @@
+# File: .github/workflows/android-release.yml
+
 name: '📦 Build & Release APK'
 
 on:
   push:
     tags:
-      - 'v*'                # e.g. v1.2.3
-  workflow_dispatch:       # manual trigger
+      - 'v*'                # e.g. v1.0.0
+  workflow_dispatch:       # allow manual trigger
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
 
     env:
+      # these secrets must be configured in your repo settings
       JKS_BASE64:        ${{ secrets.JKS_BASE64 }}
       KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
       KEY_PASSWORD:      ${{ secrets.KEY_PASSWORD }}
@@ -33,7 +36,8 @@ jobs:
       - name: Decode & install keystore
         run: |
           mkdir -p uccelli_info_app/android/app
-          echo "$JKS_BASE64" | base64 --decode > uccelli_info_app/android/app/uccelli-release.jks
+          echo "$JKS_BASE64" | base64 --decode \
+            > uccelli_info_app/android/app/uccelli-release.jks
 
       - name: Get Flutter dependencies
         working-directory: uccelli_info_app
@@ -46,8 +50,9 @@ jobs:
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          token:        ${{ secrets.GITHUB_TOKEN }}
           tag_name:     ${{ github.ref_name }}
           release_name: Release ${{ github.ref_name }}
           draft:        false
@@ -55,8 +60,9 @@ jobs:
 
       - name: Upload APK to GitHub Release
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          token:               ${{ secrets.GITHUB_TOKEN }}
           upload_url:          ${{ steps.create_release.outputs.upload_url }}
           asset_path:          uccelli_info_app/build/app/outputs/flutter-apk/app-release.apk
           asset_name:          uccelli-info-app-${{ github.ref_name }}.apk
