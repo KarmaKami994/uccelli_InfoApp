@@ -3,8 +3,8 @@ name: '📦 Build & Archive Release APK'
 on:
   push:
     tags:
-      - 'v*'              # runs when you push a tag like v1.0.2
-  workflow_dispatch:     # also allows manual runs from the Actions UI
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   build-release:
@@ -12,7 +12,7 @@ jobs:
 
     env:
       JKS_BASE64:        ${{ secrets.JKS_BASE64 }}
-      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}   # ← note the space after the colon
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
       KEY_PASSWORD:      ${{ secrets.KEY_PASSWORD }}
 
     steps:
@@ -22,13 +22,13 @@ jobs:
       - name: Setup Java 11
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '11'
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
+          flutter-version: stable
 
       - name: Decode keystore
         run: |
@@ -44,7 +44,7 @@ jobs:
         run: flutter build apk --release
 
       - name: Archive APK
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v3     # <— use the v3 tag here
         with:
-          name: 'uccelli-release-apk'
-          path: 'build/app/outputs/flutter-apk/app-release.apk'
+          name: uccelli-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
