@@ -1,59 +1,50 @@
 name: 📦 Build & Archive Release APK
 
-# 1️⃣ Trigger only when you push a tag like "v1.0.2"
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*'              # runs when you push a tag like v1.0.2
+  workflow_dispatch:     # also allows manual runs from the Actions UI
 
 jobs:
   build-release:
     runs-on: ubuntu-latest
 
-    # 2️⃣ Make your keystore passwords available to Gradle
     env:
-      JKS_BASE64: ${{ secrets.JKS_BASE64 }}
-      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      JKS_BASE64:       ${{ secrets.JKS_BASE64 }}
+      KEYSTORE_PASSWORD:${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_PASSWORD:     ${{ secrets.KEY_PASSWORD }}
 
     steps:
-      # 3️⃣ Grab your code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 4️⃣ Install Java 11
-      - name: Setup Java
+      - name: Setup Java 11
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 11
 
-      # 5️⃣ Install Flutter SDK
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: stable
 
-      # 6️⃣ Decode your base64‐encoded keystore into android/app/
       - name: Decode keystore
         run: |
           echo "$JKS_BASE64" | base64 --decode > android/app/uccelli-release.jks
 
-      # 7️⃣ Accept Android SDK licenses so Gradle can run
       - name: Accept Android SDK licenses
         run: yes | sdkmanager --licenses
 
-      # 8️⃣ Fetch Flutter packages
       - name: Flutter pub get
         run: flutter pub get
 
-      # 9️⃣ Build the signed release APK
       - name: Build Release APK
         run: flutter build apk --release
 
-      # 🔟 Upload the APK as an artifact you can download
       - name: Archive APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: uccelli-release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
