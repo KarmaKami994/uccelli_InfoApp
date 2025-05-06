@@ -3,8 +3,8 @@ name: '📦 Build & Release APK'
 on:
   push:
     tags:
-      - 'v*'                # triggers when you push a tag like v1.2.3
-  workflow_dispatch:       # also allow manual runs from the Actions tab
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   build-and-release:
@@ -36,7 +36,16 @@ jobs:
           echo "$JKS_BASE64" | base64 --decode > android/app/uccelli-release.jks
 
       - name: Accept Android SDK licenses
-        run: yes | sdkmanager --licenses
+        run: |
+          # Try the new cmdline-tools path first
+          if [ -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ]; then
+            yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_SDK_ROOT" --licenses
+          # Fallback to the legacy tools path
+          elif [ -x "$ANDROID_SDK_ROOT/tools/bin/sdkmanager" ]; then
+            yes | "$ANDROID_SDK_ROOT/tools/bin/sdkmanager" --licenses
+          else
+            echo "sdkmanager not found, skipping license acceptance"
+          fi
 
       - name: Get Flutter dependencies
         run: flutter pub get
