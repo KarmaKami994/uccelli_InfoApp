@@ -36,12 +36,11 @@ android {
 
     signingConfigs {
         create("release") {
-            // <-- point at your keystore file in android/app/uccelli-release.jks
-            storeFile = file("uccelli-release.jks")
-            // pull passwords from env (or GitHub Secrets)
+            // Point at your keystore file in android/app/uccelli-release.jks
+            storeFile     = file("uccelli-release.jks")
             storePassword = System.getenv("KEYSTORE_PASSWORD")
-            keyAlias     = "uccelli_release"
-            keyPassword  = System.getenv("KEY_PASSWORD")
+            keyAlias      = "uccelli_release"
+            keyPassword   = System.getenv("KEY_PASSWORD")
         }
     }
 
@@ -49,16 +48,16 @@ android {
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
 
-            // Code shrinking (R8) and resource shrinking
-            isMinifyEnabled   = true
-            isShrinkResources = true
+            // Temporarily disable code & resource shrinking to avoid R8 errors
+            isMinifyEnabled   = false
+            isShrinkResources = false
 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
-        // debug can remain default
+        // debug buildType can remain default
     }
 }
 
@@ -67,8 +66,7 @@ flutter {
 }
 
 dependencies {
-    // … your other dependencies …
-
     // Core‐library desugaring for Java 8+ APIs
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    // … any other dependencies you already had …
 }
