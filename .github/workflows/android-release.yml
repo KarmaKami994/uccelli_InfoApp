@@ -3,8 +3,8 @@ name: '📦 Build & Archive Release APK'
 on:
   push:
     tags:
-      - 'v*'            # on git tags like v1.0.2
-  workflow_dispatch:   # also allow manual runs
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   build-release:
@@ -42,6 +42,10 @@ jobs:
 
       - name: Build Release APK
         run: flutter build apk --release
+
+      # ◼️ Connectivity check: ensure the runner can reach GitHub Actions API
+      - name: Test GitHub Actions API
+        run: curl -I https://api.github.com/actions/workflows
 
       - name: Archive APK
         uses: actions/upload-artifact@v2
