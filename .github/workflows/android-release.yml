@@ -3,15 +3,14 @@ name: '📦 Build & Release APK'
 on:
   push:
     tags:
-      - 'v*'                # e.g. v1.2.3
-  workflow_dispatch:       # manual trigger
+      - 'v*'                # triggers when you push a tag like v1.2.3
+  workflow_dispatch:       # also allow manual runs from the Actions tab
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
 
     env:
-      # These three secrets you’ve already added
       JKS_BASE64:        ${{ secrets.JKS_BASE64 }}
       KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
       KEY_PASSWORD:      ${{ secrets.KEY_PASSWORD }}
@@ -26,19 +25,20 @@ jobs:
           distribution: temurin
           java-version: '11'
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - name: Set up Flutter (stable channel)
+        uses: subosito/flutter-action@v1
         with:
-          flutter-version: stable
+          channel: stable
 
-      - name: Decode and install keystore
+      - name: Decode & install keystore
         run: |
+          mkdir -p android/app
           echo "$JKS_BASE64" | base64 --decode > android/app/uccelli-release.jks
 
       - name: Accept Android SDK licenses
         run: yes | sdkmanager --licenses
 
-      - name: Get dependencies
+      - name: Get Flutter dependencies
         run: flutter pub get
 
       - name: Build release APK
