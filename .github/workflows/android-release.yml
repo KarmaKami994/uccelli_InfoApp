@@ -1,54 +1,62 @@
-name: '📦 Build & Archive Release APK'
+name: '📦 Build & Release APK'
 
 on:
   push:
     tags:
-      - 'v*'
-  workflow_dispatch:
+      - 'v*'                # e.g. v1.2.3
+  workflow_dispatch:       # manual trigger
 
 jobs:
-  build-release:
+  build-and-release:
     runs-on: ubuntu-latest
 
     env:
+      # These three secrets you’ve already added
       JKS_BASE64:        ${{ secrets.JKS_BASE64 }}
       KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
       KEY_PASSWORD:      ${{ secrets.KEY_PASSWORD }}
 
     steps:
-      - name: Checkout repository
+      - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Setup Java 11
+      - name: Set up Java 11
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: '11'
 
-      - name: Setup Flutter
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: stable
 
-      - name: Decode keystore
+      - name: Decode and install keystore
         run: |
           echo "$JKS_BASE64" | base64 --decode > android/app/uccelli-release.jks
 
       - name: Accept Android SDK licenses
         run: yes | sdkmanager --licenses
 
-      - name: Flutter pub get
+      - name: Get dependencies
         run: flutter pub get
 
-      - name: Build Release APK
+      - name: Build release APK
         run: flutter build apk --release
 
-      # ◼️ Connectivity check: ensure the runner can reach GitHub Actions API
-      - name: Test GitHub Actions API
-        run: curl -I https://api.github.com/actions/workflows
-
-      - name: Archive APK
-        uses: actions/upload-artifact@v2
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
         with:
-          name: uccelli-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+      - name: Upload APK to GitHub Release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/app/outputs/flutter-apk/app-release.apk
+          asset_name: uccelli-info-app-${{ github.ref_name }}.apk
+          asset_content_type: application/vnd.android.package-archive
