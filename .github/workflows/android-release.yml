@@ -32,13 +32,15 @@ jobs:
 
       - name: Decode & install keystore
         run: |
-          mkdir -p android/app
-          echo "$JKS_BASE64" | base64 --decode > android/app/uccelli-release.jks
+          mkdir -p uccelli_info_app/android/app
+          echo "$JKS_BASE64" | base64 --decode > uccelli_info_app/android/app/uccelli-release.jks
 
       - name: Get Flutter dependencies
+        working-directory: uccelli_info_app
         run: flutter pub get
 
       - name: Build release APK
+        working-directory: uccelli_info_app
         run: flutter build apk --release
 
       - name: Create GitHub Release
@@ -54,6 +56,6 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/app/outputs/flutter-apk/app-release.apk
+          asset_path: uccelli_info_app/build/app/outputs/flutter-apk/app-release.apk
           asset_name: uccelli-info-app-${{ github.ref_name }}.apk
           asset_content_type: application/vnd.android.package-archive
