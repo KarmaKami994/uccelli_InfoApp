@@ -2,18 +2,21 @@
 
 name: '📦 Build & Release APK'
 
+# Give GITHUB_TOKEN write access to repository contents so it can create releases
+permissions:
+  contents: write
+
 on:
   push:
     tags:
-      - 'v*'                # e.g. v1.0.0
-  workflow_dispatch:       # allow manual trigger
+      - 'v*'                # triggers on git tags like v1.0.0
+  workflow_dispatch:       # also supports manual runs
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
 
     env:
-      # these secrets must be configured in your repo settings
       JKS_BASE64:        ${{ secrets.JKS_BASE64 }}
       KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
       KEY_PASSWORD:      ${{ secrets.KEY_PASSWORD }}
