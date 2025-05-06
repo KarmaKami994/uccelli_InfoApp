@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+#Secrets
+# (Don’t check in your release keystore—we decode it from a secret)
+/android/app/uccelli-release.jks

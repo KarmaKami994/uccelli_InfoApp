@@ -36,11 +36,12 @@ android {
 
     signingConfigs {
         create("release") {
-            // ← configure your keystore here if you have one
-            // storeFile = file("/path/to/your/keystore.jks")
-            // storePassword = "..."
-            // keyAlias = "..."
-            // keyPassword = "..."
+            // <-- point at your keystore file in android/app/uccelli-release.jks
+            storeFile = file("uccelli-release.jks")
+            // pull passwords from env (or GitHub Secrets)
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+            keyAlias     = "uccelli_release"
+            keyPassword  = System.getenv("KEY_PASSWORD")
         }
     }
 
@@ -49,8 +50,8 @@ android {
             signingConfig = signingConfigs.getByName("release")
 
             // Code shrinking (R8) and resource shrinking
-            isMinifyEnabled    = true
-            isShrinkResources  = true
+            isMinifyEnabled   = true
+            isShrinkResources = true
 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
