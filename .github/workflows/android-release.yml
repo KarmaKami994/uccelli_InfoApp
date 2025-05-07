@@ -2,15 +2,15 @@
 
 name: '📦 Build & Release APK'
 
-# ← Explicitly grant write access so create-release can succeed
+# ← Give the built-in GITHUB_TOKEN write access to releases/assets
 permissions:
   contents: write
 
 on:
   push:
     tags:
-      - 'v*'              # runs on tags like v1.0.9
-  workflow_dispatch:     # allows manual trigger
+      - 'v*'                # e.g. push tag v1.0.20
+  workflow_dispatch:       # also allow manual runs
 
 jobs:
   build-and-release:
