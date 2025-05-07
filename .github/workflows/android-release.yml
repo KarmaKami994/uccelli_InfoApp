@@ -1,16 +1,13 @@
-# File: .github/workflows/android-release.yml
-
 name: '📦 Build & Release APK'
-
-# ← Give the built-in GITHUB_TOKEN write access to releases/assets
-permissions:
-  contents: write
 
 on:
   push:
     tags:
-      - 'v*'                # e.g. push tag v1.0.20
-  workflow_dispatch:       # also allow manual runs
+      - 'v*'             # e.g. v1.2.3
+  workflow_dispatch:    # manual trigger
+
+permissions:
+  contents: write       # needed so GITHUB_TOKEN can create releases & upload assets
 
 jobs:
   build-and-release:
@@ -20,6 +17,8 @@ jobs:
       JKS_BASE64:        ${{ secrets.JKS_BASE64 }}
       KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
       KEY_PASSWORD:      ${{ secrets.KEY_PASSWORD }}
+      REPO:              ${{ github.repository }}     # owner/repo
+      TAG:               ${{ github.ref_name }}       # the tag that triggered this run
 
     steps:
       - name: Check out code
@@ -50,23 +49,23 @@ jobs:
         working-directory: uccelli_info_app
         run: flutter build apk --release
 
-      - name: Create GitHub Release
+      - name: Create GitHub Release via REST API
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name:     ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
-          draft:        false
-          prerelease:   false
+        run: |
+          resp=$(curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/$REPO/releases \
+            -d "{\"tag_name\":\"$TAG\",\"name\":\"Release $TAG\",\"draft\":false,\"prerelease\":false}")
+          echo "$resp"                        # for debugging
+          # extract upload_url (remove the {...} suffix)
+          upload_url=$(echo "$resp" | jq -r .upload_url | sed -e "s/{.*}//")
+          echo "UPLOAD_URL=$upload_url" >> $GITHUB_ENV
 
-      - name: Upload APK to GitHub Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url:          ${{ steps.create_release.outputs.upload_url }}
-          asset_path:          uccelli_info_app/build/app/outputs/flutter-apk/app-release.apk
-          asset_name:          uccelli-info-app-${{ github.ref_name }}.apk
-          asset_content_type:  application/vnd.android.package-archive
+      - name: Upload APK via REST API
+        run: |
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/vnd.android.package-archive" \
+            --data-binary @uccelli_info_app/build/app/outputs/flutter-apk/app-release.apk \
+            "${UPLOAD_URL}?name=uccelli-info-app-${TAG}.apk"
