@@ -22,29 +22,30 @@ import 'providers/favorites_provider.dart';
 // Entry page
 import 'pages/splash_screen.dart';
 
-/// Background FCM handler
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage msg) async {
+/// Top-level background handler for FCM messages.
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Re-initialize Firebase in the background isolate
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  debugPrint('📥 [bg] ${msg.notification?.title}');
+  debugPrint('📥 [bg] ${message.notification?.title} / ${message.data}');
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 1️⃣ Init Firebase
+  // 1️⃣ Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // 2️⃣ Init Hive & open cache box
+  // 2️⃣ Initialize Hive and open your cache box
   await Hive.initFlutter();
   await Hive.openBox(PostCacheService.postsBoxName);
 
-  // 3️⃣ Init local notifications + FCM listeners
+  // 3️⃣ Initialize local notifications & FCM listeners
   await PushNotificationService.init();
 
-  // 4️⃣ Register background handler
+  // 4️⃣ Register the background message handler
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // 5️⃣ Run the app
+  // 5️⃣ Launch the app
   runApp(
     MultiProvider(
       providers: [
@@ -58,6 +59,7 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     final themeProv = Provider.of<ThemeProvider>(context);
@@ -67,7 +69,7 @@ class MyApp extends StatelessWidget {
     const greyAcc   = Color(0xFF6A6A6A);
     const darkBg    = Color(0xFF252525);
 
-    // Minimal light theme overrides
+    // Light theme overrides
     final light = ThemeData(
       brightness: Brightness.light,
       primaryColor: primary,
@@ -88,7 +90,7 @@ class MyApp extends StatelessWidget {
       colorScheme: ColorScheme.fromSwatch(accentColor: greyAcc),
     );
 
-    // Minimal dark theme overrides
+    // Dark theme overrides
     final dark = ThemeData(
       brightness: Brightness.dark,
       primaryColor: primary,
@@ -100,7 +102,7 @@ class MyApp extends StatelessWidget {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: darkBg.withOpacity(.2),
+        fillColor: darkBg.withOpacity(0.2),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(color: greyAcc),

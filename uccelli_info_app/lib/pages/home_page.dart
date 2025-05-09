@@ -9,6 +9,7 @@ import '../providers/theme_provider.dart';
 import '../providers/favorites_provider.dart';
 import '../services/wordpress_service.dart';
 import '../widgets/custom_app_bar.dart';
+
 import 'event_details_page.dart';
 import 'post_details_page.dart';
 import 'favorites_page.dart';
@@ -88,7 +89,7 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: TabBarView(
           children: [
-            // Latest Posts Tab
+            // ─── Latest Posts ───────────────────────────────────────────────────────
             Column(
               children: [
                 Padding(
@@ -134,7 +135,7 @@ class _HomePageState extends State<HomePage> {
                           itemBuilder: (context, index) {
                             final post = filtered[index];
                             final title = post['title']['rendered'] as String;
-                            final id = post['id'].toString();
+                            final id    = post['id'].toString();
                             final isFav = favoritesProvider.isFavorite(id);
 
                             return FadeIn(
@@ -178,7 +179,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
 
-            // Upcoming Events Tab
+            // ─── Upcoming Events ────────────────────────────────────────────────────
             Column(
               children: [
                 Padding(
@@ -224,9 +225,12 @@ class _HomePageState extends State<HomePage> {
                           itemCount: filtered.length,
                           separatorBuilder: (_, __) => const SizedBox(height: 12),
                           itemBuilder: (context, index) {
-                            final event = filtered[index];
-                            final title = html_parser.parse(event['title'].toString()).documentElement?.text ?? '';
-                            final startDate = event['start_date'];
+                            final event   = filtered[index];
+                            final title   = html_parser
+                                  .parse(event['title'].toString())
+                                  .documentElement
+                                  ?.text ?? '';
+                            final start   = event['start_date'] ?? '';
 
                             return FadeIn(
                               duration: const Duration(milliseconds: 500),
@@ -238,15 +242,12 @@ class _HomePageState extends State<HomePage> {
                                 ),
                                 child: ListTile(
                                   title: Text(title),
-                                  subtitle: Text('Starts: $startDate'),
+                                  subtitle: Text('Starts: $start'),
                                   trailing: const Icon(Icons.chevron_right),
                                   onTap: () => Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => EventDetailsPage(
-                                        eventId: event['id'],
-                                        eventFuture: wpService.fetchEventDetails(event['id']),
-                                      ),
+                                      builder: (_) => EventDetailsPage(event: event),
                                     ),
                                   ),
                                 ),

@@ -1,3 +1,6 @@
+// lib/services/push_notification_service.dart
+
+import 'package:flutter/foundation.dart';           // ← for debugPrint
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
@@ -20,13 +23,21 @@ class PushNotificationService {
     // 2️⃣ Request FCM permissions
     await _fcm.requestPermission(alert: true, badge: true, sound: true);
 
-    // 3️⃣ Handle messages when app is in foreground
+    // 3️⃣ Handle messages in foreground by showing a local notification
     FirebaseMessaging.onMessage.listen(_showLocalNotification);
 
-    // 4️⃣ (Optional) Handle taps on notifications when app is backgrounded
+    // 4️⃣ Handle taps on notifications when the app is backgrounded
     FirebaseMessaging.onMessageOpenedApp.listen((msg) {
-      // You can navigate based on msg.data here
+      debugPrint('🔔 [opened_app] ${msg.notification?.title}');
+      // TODO: navigate to a specific screen if desired
     });
+
+    // 5️⃣ Handle the case where the app was completely terminated
+    final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    if (initialMessage != null) {
+      debugPrint('🔔 [terminated→opened] ${initialMessage.notification?.title}');
+      // TODO: navigate to a specific screen if desired
+    }
   }
 
   /// Display a local notification for an incoming FCM message.
