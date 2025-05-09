@@ -12,43 +12,35 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # You should have these three secrets set in Settings → Secrets:
       JKS_BASE64:        ${{ secrets.JKS_BASE64 }}
       KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
       KEY_PASSWORD:      ${{ secrets.KEY_PASSWORD }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Java 11
-        uses: actions/setup-java@v3
+      - uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: '11'
 
-      - name: Set up Flutter (stable channel)
-        uses: subosito/flutter-action@v1
+      - uses: subosito/flutter-action@v1
         with:
           channel: stable
 
       - name: Decode keystore
-        run: |
-          echo "$JKS_BASE64" | base64 --decode > android/app/uccelli-release.jks
+        run: echo "$JKS_BASE64" | base64 --decode > android/app/uccelli-release.jks
 
-      - name: Accept Android SDK licenses
+      - name: Accept SDK licenses
         run: |
           yes | sdkmanager --install "platform-tools" "platforms;android-33" "cmdline-tools;latest"
           yes | sdkmanager --licenses
 
-      - name: Flutter pub get
-        run: flutter pub get
+      - run: flutter pub get
 
-      - name: Build Release APK
-        run: flutter build apk --release
+      - run: flutter build apk --release
 
-      - name: Archive APK
-        uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v3.1.2    # pin to a real v3 patch
         with:
           name: uccelli-release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
