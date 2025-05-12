@@ -24,6 +24,13 @@ class EventDetailsPage extends StatelessWidget {
   const EventDetailsPage({Key? key, required this.event}) : super(key: key);
 
   void _addToCalendar(BuildContext context) {
+    // --- Debugging: Überprüfen, ob Funktion aufgerufen wird ---
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Function entered!')),
+    );
+    print('_addToCalendar function entered.'); // Auch für die Debug-Konsole
+    // --------------------------------------------------------
+
     try {
       // Parse out the fields we need
       final title = parse(event['title']?.toString() ?? '')
@@ -100,7 +107,6 @@ class EventDetailsPage extends StatelessWidget {
       );
 
       // --- Aufruf des Plugins und grundlegende Fehlerbehandlung ---
-      // This launches the native calendar app with your event pre-filled
       Add2Calendar.addEvent2Cal(calendarEvent);
       // Das Plugin selbst sollte die native UI öffnen, wenn erfolgreich.
       // Eine explizite Erfolgsmeldung ist oft nicht nötig.
@@ -174,6 +180,12 @@ class EventDetailsPage extends StatelessWidget {
           //           SnackBar(
           //             content: Text(isFavorite ? 'Von Favoriten entfernt' : 'Zu Favoriten hinzugefügt'),
           //             duration: const Duration(seconds: 1),
+                          // action: SnackBarAction( // Optional: Action auf der Snackbar
+                          //   label: 'UNDO',
+                          //   onPressed: () {
+                          //     // Undo logic
+                          //   },
+                          // ),
           //           ),
           //         );
           //       },
