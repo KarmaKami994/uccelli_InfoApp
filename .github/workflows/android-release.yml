@@ -10,8 +10,8 @@ permissions:
   contents: write       # needed to create releases & upload assets
 
 env:
-  REPO: ${{ github.repository }}   # owner/repo
-  TAG:  ${{ github.ref_name }}     # e.g. "v1.2.3"
+  REPO: ${{ github.repository }}     # owner/repo
+  TAG:  ${{ github.ref_name }}       # e.g. "v1.2.3"
 
 jobs:
   build-and-release:
@@ -36,6 +36,13 @@ jobs:
         uses: subosito/flutter-action@v1
         with:
           channel: stable
+          # Optional: Du könntest hier caching für das Flutter SDK aktivieren:
+          # cache: true
+
+      # >>> NEUER SCHRITT: Pfad zu sdkmanager hinzufügen <<<
+      - name: Add Android SDK cmdline-tools to PATH
+        run: echo "PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
+      # >>> ENDE NEUER SCHRITT <<<
 
       - name: Decode & install keystore
         run: |
