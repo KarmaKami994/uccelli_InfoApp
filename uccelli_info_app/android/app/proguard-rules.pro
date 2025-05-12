@@ -17,4 +17,15 @@
   <init>();
 }
 
+# Add dontwarn rules for androidx.window packages
+# This tells R8 to ignore warnings about missing references in these packages.
+# Use this as a diagnostic step if keep rules don't resolve the compilation failure.
+-dontwarn androidx.window.**
+-dontwarn androidx.window.core.**
+-dontwarn androidx.window.extensions.**
+-dontwarn androidx.window.extensions.area.**
+-dontwarn androidx.window.extensions.embedding.**
+-dontwarn androidx.window.layout.**
+-dontwarn androidx.window.sidecar.**
+
 # Add any other project-specific keep rules below this line if needed later.
