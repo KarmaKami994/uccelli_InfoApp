@@ -25,7 +25,7 @@ android {
             // your workflow writes this file for us:
             storeFile     = file("uccelli-release.jks")
             storePassword = System.getenv("KEYSTORE_PASSWORD")
-            keyAlias      = "uccelli_release"        // adjust if your alias differs
+            keyAlias      = "upload"        // adjust if your alias differs
             keyPassword   = System.getenv("KEY_PASSWORD")
         }
     }
