@@ -7,14 +7,14 @@
 # To enable R8 tracing, add the following flag:
 # -printconfiguration ./r8-configuration.txt
 
-# Keep rules for androidx.window and its sub-packages (to fix R8 errors like Missing class androidx.window...)
-# Expanding rules based on specific missing classes observed in logs.
--keep class androidx.window.** { *; } # Allgemeine Regel (behalten)
--keep class androidx.window.core.** { *; } # explizit core
--keep class androidx.window.extensions.** { *; } # explizit extensions
--keep class androidx.window.extensions.area.** { *; } # explizit extensions.area (neu basierend auf Log)
--keep class androidx.window.extensions.embedding.** { *; } # explizit extensions.embedding (neu basierend auf Log)
--keep class androidx.window.layout.** { *; } # explizit layout
--keep class androidx.window.sidecar.** { *; } # explizit sidecar
+# SEHR BREITE Keep rules for androidx.window (Versuch, wenn spezifische Regeln fehlschlagen)
+# Dies versucht, alle Klassen, Felder, Methoden und Konstruktoren im androidx.window Paket und Unterpaketen zu behalten.
+# Verwende dies, wenn die spezifischeren Regeln nicht funktioniert haben. Dies könnte die APK-Größe erhöhen.
+-keep class androidx.window.** { *; }
+-keep class androidx.window.** {
+  <fields>;
+  <methods>;
+  <init>();
+}
 
 # Add any other project-specific keep rules below this line if needed later.
