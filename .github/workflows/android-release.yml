@@ -42,41 +42,39 @@ jobs:
       - name: Add Android SDK cmdline-tools to PATH # Fix für sdkmanager not found
         run: echo "PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
 
-      # >>> Keystore-Pfad KORRIGIERT auf flutter/uccelli_info_app <<<
+      # >>> Keystore-Pfad KORRIGIERT auf uccelli_info_app <<<
       - name: Decode & install keystore
         run: |
-          mkdir -p flutter/uccelli_info_app/android/app # Verzeichnis im Projekt erstellen (relativ zum Repo-Root)
+          mkdir -p uccelli_info_app/android/app # Verzeichnis im Projekt erstellen (relativ zum Repo-Root)
           echo "$JKS_BASE64" | base64 --decode \
-            > flutter/uccelli_info_app/android/app/uccelli-release.jks # Keystore im Projekt ablegen (relativ zum Repo-Root)
+            > uccelli_info_app/android/app/uccelli-release.jks # Keystore im Projekt ablegen (relativ zum Repo-Root)
       # >>> Ende Korrektur Keystore-Pfad <<<
 
-      # >>> working-directory hinzugefügt <<<
+      # >>> working-directory KORRIGIERT auf uccelli_info_app <<<
       - name: Accept Android SDK licenses
-        working-directory: flutter/uccelli_info_app # In das Projektverzeichnis wechseln (damit sdkmanager in der richtigen Umgebung läuft, falls nötig)
+        working-directory: uccelli_info_app # In das Projektverzeichnis wechseln (damit sdkmanager in der richtigen Umgebung läuft, falls nötig)
         run: |
-          # Es ist möglich, dass dieser Schritt hier nicht nötig ist, wenn subosito/flutter-action ihn abdeckt.
-          # Aber wenn der Fehler wieder auftritt, ist dies der richtige Ort dafür.
           yes | sdkmanager --install "platform-tools" "platforms;android-33" "cmdline-tools;latest"
           yes | sdkmanager --licenses
       # >>> Ende working-directory <<<
 
 
-      # >>> working-directory KORRIGIERT auf flutter/uccelli_info_app <<<
+      # >>> working-directory KORRIGIERT auf uccelli_info_app <<<
       - name: Get Flutter dependencies
-        working-directory: flutter/uccelli_info_app # In das Projektverzeichnis wechseln
+        working-directory: uccelli_info_app # In das Projektverzeichnis wechseln
         run: flutter pub get
       # >>> Ende working-directory <<<
 
-      # >>> working-directory KORRIGIERT auf flutter/uccelli_info_app <<<
+      # >>> working-directory KORRIGIERT auf uccelli_info_app <<<
       - name: Build release APK
-        working-directory: flutter/uccelli_info_app # In das Projektverzeichnis wechseln
+        working-directory: uccelli_info_app # In das Projektverzeichnis wechseln
         run: flutter build apk --release
       # >>> Ende working-directory <<<
 
-      # >>> working-directory KORRIGIERT auf flutter/uccelli_info_app (für Zugriff auf build Output) <<<
+      # >>> working-directory KORRIGIERT auf uccelli_info_app (für Zugriff auf build Output) <<<
       - name: Create GitHub Release via REST API
         id: create_release
-        working-directory: flutter/uccelli_info_app # In das Projektverzeichnis wechseln
+        working-directory: uccelli_info_app # In das Projektverzeichnis wechseln
         run: |
           response=$(curl -s -X POST \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
@@ -88,9 +86,9 @@ jobs:
           echo "UPLOAD_URL=$upload_url" >> $GITHUB_ENV
       # >>> Ende working-directory <<<
 
-      # >>> working-directory KORRIGIERT auf flutter/uccelli_info_app (für Zugriff auf build Output) <<<
+      # >>> working-directory KORRIGIERT auf uccelli_info_app (für Zugriff auf build Output) <<<
       - name: Upload APK asset via REST API
-        working-directory: flutter/uccelli_info_app # In das Projektverzeichnis wechseln
+        working-directory: uccelli_info_app # In das Projektverzeichnis wechseln
         run: |
           curl -s -X POST \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
