@@ -1,7 +1,8 @@
 # Add project specific Proguard rules here.
 # By default, the flags in "proguard-android-optimize.txt" are used.
-# You can remove the following line and add your own Proguard rules here.
--include proguard-android-optimize.txt
+# This file is typically included via build.gradle using getDefaultProguardFile().
+# Remove the -include line below if using getDefaultProguardFile in build.gradle.
+#-include proguard-android-optimize.txt # Diese Zeile wurde entfernt, da die Standardregeln über build.gradle.kts eingebunden werden.
 
 # To enable R8 tracing, add the following flag:
 # -printconfiguration ./r8-configuration.txt
