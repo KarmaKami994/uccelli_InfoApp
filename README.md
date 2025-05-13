@@ -32,7 +32,7 @@ Die Uccelli Society Info App wurde entwickelt, um Mitgliedern und Interessierten
 * **Datenverarbeitung:** **HTML-Parsing und Unescaping** von API-Inhalten zur sauberen Darstellung in der App.
 * **Lokale Datenhaltung:** Nutzung von **Hive** für robustes und schnelles Offline-Caching von Posts.
 * **Push Notifications:** Integration von **Firebase Cloud Messaging (FCM)** für zuverlässige Benachrichtigungsdienste.
-* **OTA Updates:** Implementierung einer **Over-The-Air (OTA) Update-Funktionalität** für die App-Verteilung außerhalb von App Stores, inkl. Versionsprüfung (über GitHub Releases API), Download-Logik und Berechtigungsmanagement (`permission_handler`, `app_settings`, `dio`, `open_filex`).
+* **OTA Updates:** Implementierung einer **Over-The-Air (OTA) Update-Funktionalität** für die App-Verteilung ausserhalb von App Stores, inkl. Versionsprüfung (über GitHub Releases API), Download-Logik und Berechtigungsmanagement (`permission_handler`, `app_settings`, `dio`, `open_filex`).
 * **CI/CD Pipeline:** Automatisierter Release-Build (APK) über **GitHub Actions**, ausgelöst durch Git Tags, inkl. Code-Shrinking (R8/Proguard) und Signierung.
 * **Plattformspezifische Anpassungen:** Handling von Android-spezifischen Konfigurationen (z.B. `AndroidManifest.xml` Permissions, `FileProvider`) für Features wie OTA-Updates und Kalenderintegration.
 * **Versionsmanagement:** Verwaltung von App- und Paketversionen (`pubspec.yaml`, `package_info_plus`, `version`).
