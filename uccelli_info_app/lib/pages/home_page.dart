@@ -10,6 +10,10 @@ import 'package:open_filex/open_filex.dart'; // <-- Import für open_filex
 import 'dart:io'; // <-- Import für File
 import 'package:permission_handler/permission_handler.dart'; // <-- Import für permission_handler
 import 'package:fluttertoast/fluttertoast.dart'; // <-- Import für fluttertoast
+import 'package:url_launcher/url_launcher.dart'; // <-- Import für url_launcher
+import 'package:package_info_plus/package_info_plus.dart'; // <-- Import für package_info_plus (schon da, aber wichtig für diesen Task)
+import 'package:app_settings/app_settings.dart'; // <-- Import für app_settings
+
 
 import '../providers/theme_provider.dart';
 import '../providers/favorites_provider.dart';
@@ -30,7 +34,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-- Mixin hier hinzufügen
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-- Start der _HomePageState Klasse
 
   final WordPressService wpService = WordPressService();
   late Future<List<dynamic>> postsFuture;
@@ -86,7 +90,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
   }
 
   // Hilfsmethode zum Anzeigen der Update-Snackbar
-  void _showUpdateSnackbar(AppUpdateInfo updateInfo) {
+  void _showUpdateSnackbar(AppUpdateInfo updateInfo) { // <-- Anfang der _showUpdateSnackbar Methode
      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Update verfügbar! Neueste Version: ${updateInfo.latestVersion}'),
@@ -94,6 +98,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
             label: 'Herunterladen',
             onPressed: () {
               print('Download-Button gedrückt. URL: ${updateInfo.downloadUrl}');
+              // Snackbar abweisen, damit sie nicht doppelt erscheint
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
               if (updateInfo.downloadUrl != null) {
                 _downloadAndInstallApk(context, updateInfo.downloadUrl!); // Aufruf der Download-Methode
               } else {
@@ -111,11 +118,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
           duration: const Duration(seconds: 15), // Zeige die Snackbar mit dem Button für 15 Sekunden
         ),
       );
-  }
+  } // <-- Ende der _showUpdateSnackbar Methode
 
 
   // Methode zur Update-Prüfung und Anzeige einer Benachrichtigung (Speichert jetzt das Ergebnis)
-  Future<void> _checkForUpdates() async {
+  Future<void> _checkForUpdates() async { // <-- Anfang der _checkForUpdates Methode
     // Gebe der UI eine Sekunde Zeit, um sich aufzubauen, bevor die Snackbar kommt
     await Future.delayed(const Duration(seconds: 1));
 
@@ -128,16 +135,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
       // Speichere die Update-Informationen
       _availableUpdate = updateInfo;
       // Zeige die Snackbar (erstmalig)
-      _showUpdateSnackbar(updateInfo);
+      _showUpdateSnackbar(_availableUpdate!); // <-- Ruft die Hilfsmethode auf
     } else {
       // Setze die Update-Informationen zurück, wenn kein Update verfügbar ist oder ein Fehler auftrat
       _availableUpdate = null;
        debugPrint('Kein Update verfügbar oder Fehler bei der Prüfung.');
     }
-  }
+  } // <-- Ende der _checkForUpdates Methode
+
 
   // >>> METHODE: APK herunterladen und Installation starten <<<
-  Future<void> _downloadAndInstallApk(BuildContext context, String apkUrl) async {
+  Future<void> _downloadAndInstallApk(BuildContext context, String apkUrl) async { // <-- Anfang der _downloadAndInstallApk Methode
     // --- Prüfung auf Berechtigung "Unbekannte Apps installieren" (Android >= 8.0) ---
     // Diese Berechtigung ist notwendig, um eine APK herunterzuladen und die Installation zu starten.
     final status = await Permission.requestInstallPackages.status;
@@ -237,10 +245,37 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
             ),
             TextButton(
               child: const Text('Einstellungen öffnen'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                openAppSettings(); // Diese Methode kommt vom permission_handler Paket
-              },
+              onPressed: () async { // <<< Async machen
+                Navigator.of(context).pop(); // Schließt den Dialog
+
+                try {
+                  // --- Spezifische Einstellungsseite mit app_settings öffnen ---
+                  // Verwende das korrekte Paket und den richtigen AppSettingsType für diese spezifische Einstellung
+                  // Kein Zuweisen zu bool, da openAppSettings void zurückgibt.
+                  await AppSettings.openAppSettings( // <-- await Aufruf ohne Zuweisung
+                    type: AppSettingsType.manageUnknownAppSources, // <-- Korrekter Typ für "Unbekannte Apps installieren"
+                  );
+
+                  // Kein if (!launched) Check mehr, da openAppSettings void ist.
+                  // Fehler werden durch den catch-Block abgefangen.
+
+                } catch (e) {
+                  // Fehler während des Startens der Einstellungsseite (z.B. Intent nicht verfügbar auf Gerät)
+                  print('Error launching settings: $e');
+                  // Verwende Fluttertoast für Benutzerfeedback bei einem Fehler
+                  Fluttertoast.showToast(
+                      msg: 'Fehler beim Öffnen der Einstellungen: $e',
+                      toastLength: Toast.LENGTH_LONG,
+                      gravity: ToastGravity.BOTTOM,
+                      backgroundColor: Colors.red,
+                      textColor: Colors.white,
+                      fontSize: 16.0
+                  );
+                  // Fallback: Bei einem Fehler, öffne die allgemeinen App-Einstellungen
+                  // Dies ist ein Fallback, falls der spezifische Intent fehlschlägt
+                  openAppSettings(); // Methode vom permission_handler Paket
+                }
+              }, // <<< Ende onPressed
             ),
           ],
         ),
