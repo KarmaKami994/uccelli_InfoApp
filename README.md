@@ -92,6 +92,11 @@ Um das Projekt lokal einzurichten und auszuführen:
 *Hinweis:* Für bestimmte Funktionen wie Firebase-Push-Benachrichtigungen und Google Maps musst du möglicherweise eine eigene Firebase-Projektkonfiguration (`google-services.json` für Android, `GoogleService-Info.plist` für iOS) und API-Schlüssel einrichten.
 
 ---
+## Status Badge
+
+[![📦 Build & Release APK](https://github.com/KarmaKami994/uccelli_InfoApp/actions/workflows/android-release.yml/badge.svg)](https://github.com/KarmaKami994/uccelli_InfoApp/actions/workflows/android-release.yml)
+---
+
 
 ## 📄 Lizenz
 
