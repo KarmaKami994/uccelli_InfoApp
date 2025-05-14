@@ -12,7 +12,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 // <<< Ende Import >>>
 
 // Importiere main.dart, um auf MyAppState zuzugreifen
-import '../main.dart'; 
+import '../main.dart'; // <-- Import hinzufügen
+
 
 import '../providers/theme_provider.dart';
 import '../providers/favorites_provider.dart';
@@ -67,7 +68,7 @@ class _SettingsPageState extends State<SettingsPage> {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       // >>> Lokalisierter Text für SnackBar <<<
-       // Stelle sicher, dass 'translateKeyForCouldNotOpenLink' in deinen ARB Dateien existiert
+       // Stelle sicher, dass translateKeyForCouldNotOpenLink in deinen ARB Dateien existiert
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.translateKeyForCouldNotOpenLink))); // <-- Füge einen Schlüssel hinzu und verwende ihn
     }
