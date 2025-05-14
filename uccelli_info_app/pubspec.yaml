@@ -38,6 +38,8 @@ dependencies:
   fluttertoast: ^8.2.5
   app_settings: ^6.1.1
   html_unescape: ^2.0.0
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
@@ -50,8 +52,12 @@ flutter_icons:
   ios: true
   image_path: "lib/assets/images/logo_light.png"
 
+
+
 flutter:
   uses-material-design: true
+  generate: true
+  
 
   assets:
     - lib/assets/images/Logo_Uccelli_Quer_Negativ.png

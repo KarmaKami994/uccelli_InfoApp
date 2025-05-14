@@ -1,0 +1,33 @@
+{
+  "@@locale": "en",
+  "appTitle": "Uccelli Society Info App",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "helloWorld": "Hello World!",
+
+  "settingsPageTitle": "Settings",
+  "darkModeSetting": "Dark Mode",
+  "enableNotificationsSetting": "Enable Notifications",
+  "clearFavoritesSetting": "Clear Favorites",
+  "clearFavoritesSubtitle": "Remove all bookmarked posts",
+  "rateAppSetting": "Rate this App",
+  "shareAppSetting": "Share this App",
+  "sendFeedbackSetting": "Send Feedback",
+  "reportBugSetting": "Report a Bug",
+  "aboutSetting": "About",
+  "versionPrefix": "Version",
+  "translateKeyForCouldNotOpenLink": "Could not open link",
+  "translateKeyForLanguageSetting": "Language",
+
+  "latestPostsTabTitle": "Latest Posts",
+  "upcomingEventsTabTitle": "Upcoming Events",
+  "searchPostsLabel": "Search Posts",
+  "searchEventsLabel": "Search Events",
+  "noPostsFound": "No posts found.",
+  "errorLoadingPosts": "Error loading posts:",
+  "noEventsFound": "No events found.",
+  "errorLoadingEvents": "Error loading events:",
+  "eventStartsPrefix": "Starts:",
+  "homePageTitle": "Uccelli Society"
+}

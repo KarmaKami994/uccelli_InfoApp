@@ -14,6 +14,10 @@ import 'package:url_launcher/url_launcher.dart'; // <-- Import für url_launcher
 import 'package:package_info_plus/package_info_plus.dart'; // <-- Import für package_info_plus (schon da, aber wichtig für diesen Task)
 import 'package:app_settings/app_settings.dart'; // <-- Import für app_settings
 
+// >>> Importiere generierten Lokalisierungs-Code <<<
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+// <<< Ende Import >>>
+
 
 import '../providers/theme_provider.dart';
 import '../providers/favorites_provider.dart';
@@ -90,14 +94,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
   }
 
   // Hilfsmethode zum Anzeigen der Update-Snackbar
-  void _showUpdateSnackbar(AppUpdateInfo updateInfo) { // <-- Anfang der _showUpdateSnackbar Methode
+  void _showUpdateSnackbar(AppUpdateInfo updateInfo) {
      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Update verfügbar! Neueste Version: ${updateInfo.latestVersion}'),
+          content: Text('Update verfügbar! Neueste Version: ${updateInfo.latestVersion}'), // TODO: Diesen Text lokalisieren
           action: SnackBarAction(
-            label: 'Herunterladen',
+            label: 'Herunterladen', // TODO: Diesen Label lokalisieren
             onPressed: () {
-              print('Download-Button gedrückt. URL: ${updateInfo.downloadUrl}');
+              print('Download-Button gedrückt. URL: ${updateInfo.downloadUrl}'); // Behalte den Print für Debugging
               // Snackbar abweisen, damit sie nicht doppelt erscheint
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
@@ -105,7 +109,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
                 _downloadAndInstallApk(context, updateInfo.downloadUrl!); // Aufruf der Download-Methode
               } else {
                  Fluttertoast.showToast(
-                     msg: "Download-URL nicht verfügbar.",
+                     msg: "Download-URL nicht verfügbar.", // TODO: Diesen Text lokalisieren
                      toastLength: Toast.LENGTH_LONG,
                      gravity: ToastGravity.BOTTOM,
                      backgroundColor: Colors.red,
@@ -118,7 +122,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
           duration: const Duration(seconds: 15), // Zeige die Snackbar mit dem Button für 15 Sekunden
         ),
       );
-  } // <-- Ende der _showUpdateSnackbar Methode
+  }
 
 
   // Methode zur Update-Prüfung und Anzeige einer Benachrichtigung (Speichert jetzt das Ergebnis)
@@ -155,7 +159,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
       // Berechtigung ist erteilt, fahre mit Download und Installation fort.
       // Verwende Fluttertoast für diese Nachricht
       Fluttertoast.showToast(
-          msg: "Berechtigung erteilt. Download startet...",
+          msg: "Berechtigung erteilt. Download startet...", // TODO: Diesen Text lokalisieren
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.black54,
@@ -184,7 +188,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
             if (total != -1) {
               // Optional: Fortschritt in der Konsole anzeigen
               print('Download progress: ${(received / total * 100).toStringAsFixed(0)}%');
-              // Du könntest hier eine Fortschrittsanzeige in der UI aktualisieren (z.B. mit einem State oder Provider)
+              // Du könntest hier eine Fortschrittsanzeige in der UI aktualisieren (z.g. mit einem State oder Provider)
               // oder einen temporären Toast mit Fortschritt anzeigen (kann aber sehr viele Toasts erzeugen)
             }
           },
@@ -192,7 +196,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
 
         // Zeige Nachricht, dass der Download abgeschlossen ist
         Fluttertoast.showToast(
-            msg: "Download abgeschlossen. Installation wird gestartet...",
+            msg: "Download abgeschlossen. Installation wird gestartet...", // TODO: Diesen Text lokalisieren
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
             backgroundColor: Colors.black54,
@@ -208,7 +212,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
         if (result.type != ResultType.done) {
            print('Failed to open file: ${result.message}');
            Fluttertoast.showToast(
-               msg: 'Fehler beim Starten der Installation: ${result.message}',
+               msg: 'Fehler beim Starten der Installation: ${result.message}', // TODO: Diesen Text lokalisieren
                toastLength: Toast.LENGTH_LONG,
                gravity: ToastGravity.BOTTOM,
                backgroundColor: Colors.red, // Rot für Fehler
@@ -221,7 +225,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
         // Fehler während des Downloads oder der Dateioperationen
         print('Error during download or install: $e');
         Fluttertoast.showToast(
-            msg: 'Fehler beim Herunterladen oder Installieren: $e',
+            msg: 'Fehler beim Herunterladen oder Installieren: $e', // TODO: Diesen Text lokalisieren
             toastLength: Toast.LENGTH_LONG,
             gravity: ToastGravity.BOTTOM,
             backgroundColor: Colors.red, // Rot für Fehler
@@ -236,15 +240,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
       showDialog(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-          title: const Text('Berechtigung erforderlich'),
-          content: const Text('Um Updates direkt installieren zu können, benötigst du die Berechtigung "Unbekannte Apps installieren" für diese App. Tippe auf "Einstellungen öffnen", um die Berechtigung zu erteilen.'),
+          title: const Text('Berechtigung erforderlich'), // TODO: Diesen Text lokalisieren
+          content: const Text('Um Updates direkt installieren zu können, benötigst du die Berechtigung "Unbekannte Apps installieren" für diese App. Tippe auf "Einstellungen öffnen", um die Berechtigung zu erteilen.'), // TODO: Diesen Text lokalisieren
           actions: <Widget>[
             TextButton(
-              child: const Text('Abbrechen'),
+              child: const Text('Abbrechen'), // TODO: Diesen Text lokalisieren
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: const Text('Einstellungen öffnen'),
+              child: const Text('Einstellungen öffnen'), // TODO: Diesen Text lokalisieren
               onPressed: () async { // <<< Async machen
                 Navigator.of(context).pop(); // Schließt den Dialog
 
@@ -264,7 +268,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
                   print('Error launching settings: $e');
                   // Verwende Fluttertoast für Benutzerfeedback bei einem Fehler
                   Fluttertoast.showToast(
-                      msg: 'Fehler beim Öffnen der Einstellungen: $e',
+                      msg: 'Fehler beim Öffnen der Einstellungen: $e', // TODO: Diesen Text lokalisieren
                       toastLength: Toast.LENGTH_LONG,
                       gravity: ToastGravity.BOTTOM,
                       backgroundColor: Colors.red,
@@ -283,7 +287,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
     } else {
       print('Install unknown apps permission status: $status');
        Fluttertoast.showToast(
-          msg: 'Berechtigung zur Installation unbekannter Apps hat Status: $status',
+          msg: 'Berechtigung zur Installation unbekannter Apps hat Status: $status', // TODO: Diesen Text lokalisieren
           toastLength: Toast.LENGTH_LONG,
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.orange, // Orange für Warnung
@@ -301,16 +305,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
     final isDarkMode = themeProvider.isDarkMode;
     const cardMargin = EdgeInsets.symmetric(horizontal: 16, vertical: 8);
 
+    // >>> Zugriff auf lokalisierte Texte <<<
+    final l10n = AppLocalizations.of(context)!; // <-- Hol dir die Instanz der lokalisierten Texte
+
+
     return DefaultTabController( // <-- Das ist der Beginn deines Widget-Baums in build
       length: 2,
       child: Scaffold(
         appBar: customAppBar(
           context,
-          title: 'Uccelli Society',
-          bottom: const TabBar(
+          title: l10n.homePageTitle, // <-- Verwende lokalisierten App Bar Titel
+          bottom: TabBar( // Kein const mehr, da die Texte lokalisiert sind
             tabs: [
-              Tab(text: 'Latest Posts'),
-              Tab(text: 'Upcoming Events'),
+              Tab(text: l10n.latestPostsTabTitle), // <-- Verwende lokalisierten Text
+              Tab(text: l10n.upcomingEventsTabTitle), // <-- Verwende lokalisierten Text
             ],
           ),
           actions: [
@@ -319,20 +327,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
               onPressed: themeProvider.toggleTheme,
             ),
             IconButton(
-              icon: const Icon(Icons.favorite),
+              icon: const Icon(Icons.favorite), // const bleibt hier
               onPressed: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const FavoritesPage()),
+                MaterialPageRoute(builder: (_) => const FavoritesPage()), // TODO: Page Title lokalisieren
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.settings),
+              icon: const Icon(Icons.settings), // const bleibt hier // TODO: Page Title lokalisieren
               onPressed: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const SettingsPage()),
+                MaterialPageRoute(builder: (_) => const SettingsPage()), // TODO: Page Title lokalisieren
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 8), // const bleibt hier
           ],
         ),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -342,12 +350,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
             Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0), // const bleibt hier
                   child: TextField(
-                    decoration: const InputDecoration(
-                      labelText: 'Search Posts',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.search),
+                    decoration: InputDecoration( // Kein const mehr wegen lokalisiertem LabelText
+                      labelText: l10n.searchPostsLabel, // <-- Verwende lokalisierten Text
+                      border: const OutlineInputBorder(), // const bleibt hier
+                      prefixIcon: const Icon(Icons.search), // const bleibt hier
                     ),
                     onChanged: (v) => setState(() => postsSearchQuery = v.toLowerCase()),
                   ),
@@ -359,9 +367,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
                       future: postsFuture,
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
+                          return const Center(child: CircularProgressIndicator()); // const bleibt hier
                         } else if (snapshot.hasError) {
-                          return Center(child: Text('Error loading posts: ${snapshot.error}'));
+                          // >>> Lokalisierter Text mit String-Interpolation <<<
+                          return Center(child: Text('${l10n.errorLoadingPosts} ${snapshot.error}')); // <-- Verwende lokalisierten Text
                         }
 
                         final filtered = snapshot.data!
@@ -377,13 +386,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
                           .toList();
 
                         if (filtered.isEmpty) {
-                          return const Center(child: Text('No posts found.'));
+                          // >>> Lokalisierter Text <<<
+                          return Center(child: Text(l10n.noPostsFound)); // <-- Verwende lokalisierten Text
                         }
 
                         return ListView.separated(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 16), // const bleibt hier
                           itemCount: filtered.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 12),
+                          separatorBuilder: (_, __) => const SizedBox(height: 12), // const bleibt hier
                           itemBuilder: (context, index) {
                             final post = filtered[index];
                             final title = post['title']['rendered'] as String;
@@ -391,32 +401,22 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
                             final isFav = favoritesProvider.isFavorite(id);
 
                             return FadeIn(
-                              duration: const Duration(milliseconds: 500),
+                              duration: const Duration(milliseconds: 500), // const bleibt hier
                               delay: Duration(milliseconds: index * 100),
                               child: Card(
-                                margin: cardMargin,
-                                shape: RoundedRectangleBorder(
+                                margin: cardMargin, // const bleibt hier
+                                shape: RoundedRectangleBorder( // <-- Entferne const hier
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: ListTile(
                                   title: Text(title),
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                        icon: Icon(
-                                          isFav ? Icons.favorite : Icons.favorite_border,
-                                          color: isFav ? Colors.red : Colors.grey,
-                                        ),
-                                        onPressed: () => favoritesProvider.toggleFavorite(id),
-                                      ),
-                                      const Icon(Icons.chevron_right),
-                                    ],
-                                  ),
+                                  // >>> Lokalisierter Text mit String-Interpolation <<<
+                                  subtitle: Text('${l10n.eventStartsPrefix} ${post['date'] ?? ''}'), // <-- Verwende lokalisierten Präfix
+                                  trailing: const Icon(Icons.chevron_right), // const bleibt hier
                                   onTap: () => Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => PostDetailsPage(post: post),
+                                      builder: (_) => PostDetailsPage(post: post), // TODO: Page Title lokalisieren
                                     ),
                                   ),
                                 ),
@@ -435,12 +435,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
             Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0), // const bleibt hier
                   child: TextField(
-                    decoration: const InputDecoration(
-                      labelText: 'Search Events',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.search),
+                    decoration: InputDecoration( // Kein const mehr wegen lokalisiertem LabelText
+                      labelText: l10n.searchEventsLabel, // <-- Verwende lokalisierten Text
+                      border: const OutlineInputBorder(), // const bleibt hier
+                      prefixIcon: const Icon(Icons.search), // const bleibt hier
                     ),
                     onChanged: (v) => setState(() => eventsSearchQuery = v.toLowerCase()),
                   ),
@@ -452,9 +452,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
                       future: eventsFuture,
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
+                          return const Center(child: CircularProgressIndicator()); // const bleibt hier
                         } else if (snapshot.hasError) {
-                          return Center(child: Text('Error loading events: ${snapshot.error}'));
+                          // >>> Lokalisierter Text mit String-Interpolation <<<
+                          return Center(child: Text('${l10n.errorLoadingEvents} ${snapshot.error}')); // <-- Verwende lokalisierten Text
                         }
 
                         final filtered = snapshot.data!
@@ -469,43 +470,45 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver { // <-
                             .toList();
 
                         if (filtered.isEmpty) {
-                          return const Center(child: Text('No events found.'));
+                          // >>> Lokalisierter Text <<<
+                          return Center(child: Text(l10n.noEventsFound)); // <-- Verwende lokalisierten Text
                         }
 
                         return ListView.separated(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 16), // const bleibt hier
                           itemCount: filtered.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
+                          separatorBuilder: (_, __) => const SizedBox(height: 12), // const bleibt hier
+                          itemBuilder: (context, index) { // <-- Anfang Events itemBuilder
                             final event  = filtered[index];
                             final title  = html_parser
                                     .parse(event['title'].toString())
                                     .documentElement
                                     ?.text ?? '';
-                            final start  = event['start_date'] ?? '';
+                            // final start  = event['start_date'] ?? ''; // <-- DIESE ZEILE ENTFERNEN
 
                             return FadeIn(
-                              duration: const Duration(milliseconds: 500),
+                              duration: const Duration(milliseconds: 500), // const bleibt hier
                               delay: Duration(milliseconds: index * 100),
                               child: Card(
-                                margin: cardMargin,
-                                shape: RoundedRectangleBorder(
+                                margin: cardMargin, // const bleibt hier
+                                shape: RoundedRectangleBorder( // <-- Stelle sicher, dass 'const' hier entfernt ist
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: ListTile(
                                   title: Text(title),
-                                  subtitle: Text('Starts: $start'),
-                                  trailing: const Icon(Icons.chevron_right),
+                                  // >>> Lokalisierter Text mit String-Interpolation <<<
+                                  subtitle: Text('${l10n.eventStartsPrefix} ${event['start_date'] ?? ''}'), // <-- HIER direkt event['start_date'] verwenden
+                                  trailing: const Icon(Icons.chevron_right), // const bleibt hier
                                   onTap: () => Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => EventDetailsPage(event: event),
+                                      builder: (_) => EventDetailsPage(event: event), // TODO: Page Title lokalisieren
                                     ),
                                   ),
                                 ),
                               ),
                             );
-                          },
+                          }, // <-- Ende Events itemBuilder
                         );
                       },
                     ),

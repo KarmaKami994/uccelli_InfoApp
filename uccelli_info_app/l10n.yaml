@@ -1,0 +1,3 @@
+# Flutter internationalization configuration
+arb-dir: lib/l10n # Spezifiziert das Verzeichnis der ARB-Dateien
+template-arb-file: app_en.arb # Spezifiziert die Vorlagen-ARB-Datei (für die Basissprache)
