@@ -2,11 +2,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:html/parser.dart' show parse;
+import 'package:html/parser.dart' as html_parser; // Beibehalten für Textbereinigung bei Bedarf
 import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+// >>> Importiere generierten Lokalisierungs-Code <<<
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+// <<< Ende Import >>>
 
 import '../providers/theme_provider.dart';
 import '../widgets/custom_app_bar.dart';
@@ -14,78 +18,72 @@ import '../widgets/custom_app_bar.dart';
 class EventDetailsPage extends StatelessWidget {
   final Map<String, dynamic> event;
 
-  /// You should push this page with:
-  /// Navigator.push(
-  ///   context,
-  ///   MaterialPageRoute(
-  ///     builder: (_) => EventDetailsPage(event: yourEventMap),
-  ///   ),
-  /// );
   const EventDetailsPage({Key? key, required this.event}) : super(key: key);
 
+  // Hilfsfunktion zur Auswahl des Titels basierend auf der Sprache
+  String _getDisplayedTitle(BuildContext context) {
+    final currentLanguageCode = Localizations.localeOf(context).languageCode;
+    final String originalTitle = event['title']?.toString() ?? 'No title';
+    final String? translatedTitle = event['title_en']?.toString();
+
+    if (currentLanguageCode == 'en' && translatedTitle != null && translatedTitle.isNotEmpty) {
+      return translatedTitle;
+    }
+    return originalTitle;
+  }
+
+  // Hilfsfunktion zur Auswahl der Beschreibung basierend auf der Sprache
+  String _getDisplayedDescription(BuildContext context) {
+    final currentLanguageCode = Localizations.localeOf(context).languageCode;
+    final String originalDescription = event['description']?.toString() ?? '';
+    final String? translatedDescription = event['description_en']?.toString();
+
+    if (currentLanguageCode == 'en' && translatedDescription != null && translatedDescription.isNotEmpty) {
+      return translatedDescription;
+    }
+    return originalDescription;
+  }
+
   void _addToCalendar(BuildContext context) {
-    // --- Debugging: Überprüfen, ob Funktion aufgerufen wird ---
+    final l10n = AppLocalizations.of(context)!; // Lokalisierung hinzufügen
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Function entered!')),
+      SnackBar(content: Text(l10n.addToCalendarFunctionEntered)), // Lokalisieren
     );
-    print('_addToCalendar function entered.'); // Auch für die Debug-Konsole
-    // --------------------------------------------------------
+    debugPrint('_addToCalendar function entered.');
 
     try {
-      // Parse out the fields we need
-      final title = parse(event['title']?.toString() ?? '')
-              .body
-              ?.text ??
-          'No title';
-      final description = parse(event['description']?.toString() ?? '')
-              .body
-              ?.text ??
-          '';
+      final title = _getDisplayedTitle(context); // Verwende den ausgewählten Titel
+      final description = html_parser.parse(_getDisplayedDescription(context)).body?.text ?? ''; // Beschreibung unescape für Kalender
 
-      // --- Fehlerbehandlung für Datums-Parsing ---
       DateTime start;
       DateTime end;
       try {
-        // Versuche, die Start- und Enddaten zu parsen
-        // Das replaceFirst(' ', 'T') hilft bei einigen Datumsformaten
-        start = DateTime.parse(
-          event['start_date'].toString().replaceFirst(' ', 'T'),
-        );
-        end = DateTime.parse(
-          event['end_date'].toString().replaceFirst(' ', 'T'),
-        );
+        start = DateTime.parse(event['start_date'].toString().replaceFirst(' ', 'T'));
+        end = DateTime.parse(event['end_date'].toString().replaceFirst(' ', 'T'));
       } on FormatException catch (e) {
-         // Fängt Fehler ab, wenn das Datumsformat falsch ist (z.B. von der API)
-         print('Error parsing date: $e'); // Ausgabe in der Debug-Konsole
-         ScaffoldMessenger.of(context).showSnackBar( // Rückmeldung für den Benutzer
-           const SnackBar(content: Text('Fehler beim Parsen der Event-Daten. Ungültiges Datumsformat.')),
-         );
-         return; // Verarbeitung stoppen
+        debugPrint('Error parsing date: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.errorParsingEventDate)), // Lokalisieren
+        );
+        return;
       } catch (e) {
-         // Fängt andere unerwartete Fehler beim Parsen ab
-         print('Unexpected error during date parsing: $e'); // Ausgabe in der Debug-Konsole
-         ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(content: Text('Ein unerwarteter Fehler ist beim Parsen der Daten aufgetreten.')),
-         );
-         return; // Verarbeitung stoppen
+        debugPrint('Unexpected error during date parsing: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.unexpectedErrorParsingEventData)), // Lokalisieren
+        );
+        return;
       }
-      // -----------------------------------------
 
-
-      // Build a human-friendly location string
       String location = '';
-      final venue = event['venue'];
+      final venue = event['venue']; // Venue ist jetzt ein JSONB-Objekt
       if (venue is Map<String, dynamic>) {
         final venueName = venue['venue'] as String? ?? '';
         final addr      = venue['address'] as String? ?? '';
         final zip       = venue['zip']     as String? ?? '';
         final city      = venue['city']    as String? ?? '';
-        location = [venueName, addr, zip, city]
-            .where((s) => s.isNotEmpty)
-            .join(', ');
+        location = [venueName, addr, zip, city].where((s) => s.isNotEmpty).join(', ');
       }
 
-      // Erstelle das Event-Objekt für das Plugin
       final calendarEvent = Event(
         title: title,
         description: description,
@@ -93,110 +91,66 @@ class EventDetailsPage extends StatelessWidget {
         startDate: start,
         endDate: end,
         iosParams: const IOSParams(
-          // on iOS you can set a reminder before the event
-          reminder: Duration(hours: 1), // Beispiel: Erinnerung 1 Stunde vorher
-          // url: "http://example.com", // Optional: URL hinzufügen
+          reminder: Duration(hours: 1),
         ),
         androidParams: const AndroidParams(
-          // optional: invite emails
           emailInvites: <String>[],
-          // optional: isAllDay
-          // isAllDay: false,
         ),
-        // allDay: false, // Optional: Ganztägig? Wird oft von start/end Dates abgeleitet
       );
 
-      // --- Aufruf des Plugins und grundlegende Fehlerbehandlung ---
       Add2Calendar.addEvent2Cal(calendarEvent);
-      // Das Plugin selbst sollte die native UI öffnen, wenn erfolgreich.
-      // Eine explizite Erfolgsmeldung ist oft nicht nötig.
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //    const SnackBar(content: Text('Event zum Kalender hinzugefügt.')),
-      // );
-      // --------------------------------------
-
     } catch (e) {
-      // Fängt alle anderen unerwarteten Fehler in der Funktion ab (z.B. Plugin-Fehler)
-      print('An unexpected error occurred in _addToCalendar: $e'); // Ausgabe in der Debug-Konsole
+      debugPrint('An unexpected error occurred in _addToCalendar: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ein allgemeiner Fehler ist beim Hinzufügen zum Kalender aufgetreten.')),
+        SnackBar(content: Text(l10n.generalErrorAddingToCalendar)), // Lokalisieren
       );
     }
   }
 
   void _shareEvent(BuildContext context) {
-    final title = parse(event['title']?.toString() ?? '')
-            .body
-            ?.text ??
-        '';
-    final link = event['website'] as String? ?? ''; // Annahme: Website-Link im Event-Daten
-    Share.share('$title\n$link', subject: title);
+    final l10n = AppLocalizations.of(context)!; // Lokalisierung hinzufügen
+    final title = _getDisplayedTitle(context); // Verwende den ausgewählten Titel
+    final link = event['url'] as String? ?? ''; // Link kommt jetzt aus 'url'
+
+    if (link.isNotEmpty) {
+      Share.share('$title\n$link', subject: title);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.noLinkAvailableForEvent)), // Lokalisieren
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final l10n = AppLocalizations.of(context)!; // Lokalisierung hinzufügen
 
-    // Event-Daten für die Anzeige extrahieren
-    final title = parse(event['title']?.toString() ?? '')
-            .body
-            ?.text ??
-        '';
-    final descriptionHtml = event['description']?.toString() ?? ''; // HTML-Beschreibung
-    final imageUrl = (event['image'] is Map<String, dynamic>)
-        ? event['image']['url'] as String? // Annahme: Bild-URL im Event-Daten
-        : null;
+    final title = _getDisplayedTitle(context); // Verwende die neue Hilfsfunktion
+    final descriptionHtml = _getDisplayedDescription(context); // Verwende die neue Hilfsfunktion
+    // Im Supabase-Schema haben wir keine 'image' oder 'featured_media_url' für Events definiert.
+    // Wenn du Event-Bilder hast, musst du diese Spalte im Schema hinzufügen und im syncScript befüllen.
+    final imageUrl = null; // event['featured_media_url'] as String? ?? null; // Annahme: Event hat featured_media_url
 
     return Scaffold(
       appBar: customAppBar(
         context,
         title: title,
         actions: [
-          // Dark/Light Mode Umschalter
           IconButton(
-            icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-            onPressed: () =>
-                Provider.of<ThemeProvider>(context, listen: false)
-                    .toggleTheme(),
+            icon: Icon(themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            onPressed: () => Provider.of<ThemeProvider>(context, listen: false).toggleTheme(),
           ),
-          // Teilen Button
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: () => _shareEvent(context),
           ),
-          // Favoriten Button - Annahme, dass favoritesProvider existiert und toggleFavorite Methode hat
-          // Consumer<FavoritesProvider>(
-          //   builder: (context, favoritesProvider, child) {
-          //     final isFavorite = favoritesProvider.isFavorite(event['id']); // Annahme: Event hat eine 'id'
-          //     return IconButton(
-          //       icon: Icon(
-          //         isFavorite ? Icons.favorite : Icons.favorite_border,
-          //         color: isFavorite ? Colors.red : null,
-          //       ),
-          //       onPressed: () {
-          //         favoritesProvider.toggleFavorite(event); // Annahme: toggleFavorite nimmt das Event-Map
-          //         ScaffoldMessenger.of(context).showSnackBar(
-          //           SnackBar(
-          //             content: Text(isFavorite ? 'Von Favoriten entfernt' : 'Zu Favoriten hinzugefügt'),
-          //             duration: const Duration(seconds: 1),
-                          // action: SnackBarAction( // Optional: Action auf der Snackbar
-                          //   label: 'UNDO',
-                          //   onPressed: () {
-                          //     // Undo logic
-                          //   },
-                          // ),
-          //           ),
-          //         );
-          //       },
-          //     );
-          //   },
-          // ),
         ],
       ),
       body: ListView(
         children: [
-          // ─── HEADER IMAGE ─────────────────────────────
+          // Header image with graceful fallback
           if (imageUrl != null)
             Image.network(
               imageUrl,
@@ -206,15 +160,15 @@ class EventDetailsPage extends StatelessWidget {
               loadingBuilder: (ctx, child, progress) =>
                   progress == null
                       ? child
-                      : Container( // Placeholder während des Ladens
+                      : Container(
                           height: 220,
                           color: Colors.grey.shade300,
                         ),
               errorBuilder: (ctx, err, stack) =>
-                  Container(height: 220, color: Colors.grey.shade300), // Placeholder bei Fehler
+                  Container(height: 220, color: Colors.grey.shade300),
             )
           else
-            Container(height: 220, color: Colors.grey.shade300), // Standard-Placeholder wenn keine URL
+            Container(height: 220, color: Colors.grey.shade300),
 
           const SizedBox(height: 16),
 
@@ -222,14 +176,13 @@ class EventDetailsPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Info', style: theme.textTheme.titleMedium),
+                    Text(l10n.infoSectionTitle, style: theme.textTheme.titleMedium), // Lokalisieren
                     const Divider(),
                     // Zeit anzeigen
                     Row(
@@ -239,8 +192,7 @@ class EventDetailsPage extends StatelessWidget {
                         const SizedBox(width: 8),
                         Flexible(
                           child: Text(
-                            // Annahme, dass start_date und end_date Strings sind
-                            'Zeit: ${event['start_date']} – ${event['end_date']}',
+                            '${l10n.timePrefix} ${event['start_date'] ?? ''} – ${event['end_date'] ?? ''}', // Lokalisieren
                             softWrap: true,
                           ),
                         ),
@@ -257,7 +209,7 @@ class EventDetailsPage extends StatelessWidget {
                             const SizedBox(width: 8),
                             Flexible(
                               child: Text(
-                                'Eintritt: ${event['cost']}', // Annahme: cost ist String
+                                '${l10n.entryFeePrefix} ${event['cost']}', // Lokalisieren
                                 softWrap: true,
                               ),
                             ),
@@ -276,17 +228,15 @@ class EventDetailsPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Beschreibung', style: theme.textTheme.titleMedium),
+                    Text(l10n.descriptionSectionTitle, style: theme.textTheme.titleMedium), // Lokalisieren
                     const Divider(),
-                    // HTML Inhalt rendern
-                    Html(data: descriptionHtml), // 'flutter_html' Plugin
+                    Html(data: descriptionHtml), // Render the selected content
                   ],
                 ),
               ),
@@ -299,29 +249,25 @@ class EventDetailsPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Veranstaltungsort',
-                        style: theme.textTheme.titleMedium),
+                    Text(l10n.venueSectionTitle, style: theme.textTheme.titleMedium), // Lokalisieren
                     const Divider(),
-                    // Venue Details anzeigen (falls vorhanden und Map ist)
                     if (event['venue'] is Map<String, dynamic>) ...[
                       Text(
-                        event['venue']['venue'] as String, // Annahme: Venue Name als String
-                        style:
-                            const TextStyle(fontWeight: FontWeight.bold),
+                        event['venue']['venue'] as String? ?? '', // Sicherstellen, dass es ein String ist
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
                       Text([
-                        event['venue']['address'], // Annahme: Adresse
-                        event['venue']['zip'], // Annahme: PLZ
-                        event['venue']['city'] // Annahme: Stadt
-                      ].whereType<String>().join(', ')), // Nur Strings verknüpfen
+                        event['venue']['address'],
+                        event['venue']['zip'],
+                        event['venue']['city']
+                      ].whereType<String>().join(', ')),
                     ],
                   ],
                 ),
@@ -340,27 +286,26 @@ class EventDetailsPage extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.calendar_today),
-                    label: const Text('Add to Calendar'),
-                    onPressed: () => _addToCalendar(context), // Ruft die Funktion mit Fehlerbehandlung auf
+                    label: Text(l10n.addToCalendarButtonLabel), // Lokalisieren
+                    onPressed: () => _addToCalendar(context),
                   ),
                 ),
                 const SizedBox(width: 16),
-                // Join the Event Button (bisher nicht implementiert)
+                // Join the Event Button
                 Expanded(
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.event_available),
-                    label: const Text('Join the Event'),
+                    label: Text(l10n.joinEventButtonLabel), // Lokalisieren
                     onPressed: () {
-                      // deine bestehende “join event” Logik…
-                          // Beispiel: URL öffnen, falls ein Link vorhanden ist
-                          // final eventUrl = event['website'] as String?; // Annahme: Website-Link
-                          // if (eventUrl != null && eventUrl.isNotEmpty) {
-                          //   launchUrl(Uri.parse(eventUrl));
-                          // } else {
-                          //    ScaffoldMessenger.of(context).showSnackBar(
-                          //      const SnackBar(content: Text('Kein Link für dieses Event verfügbar.')),
-                          //    );
-                          // }
+                      // Deine bestehende “join event” Logik…
+                      final eventUrl = event['url'] as String?; // Link kommt jetzt aus 'url'
+                      if (eventUrl != null && eventUrl.isNotEmpty) {
+                        launchUrl(Uri.parse(eventUrl));
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.noLinkAvailableForEvent)), // Lokalisieren
+                        );
+                      }
                     },
                   ),
                 ),

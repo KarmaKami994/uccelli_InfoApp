@@ -2,12 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // <-- Import hinzufügen
-
-// Firebase Core & Messaging
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'firebase_options.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Hive for local cache
 import 'package:hive_flutter/hive_flutter.dart';
@@ -28,31 +23,29 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 // >>> Importiere Standard Lokalisierungs-Delegates <<<
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+// NEU: Supabase Import
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Top-level background handler for FCM messages.
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Re-initialize Firebase in the background isolate
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  debugPrint('📥 [bg] ${message.notification?.title} / ${message.data}');
-}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 1️⃣ Initialize Firebase
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // 1️⃣ Initialize Supabase Client
+  // ERSETZE 'YOUR_SUPABASE_URL' und 'YOUR_SUPABASE_ANON_KEY' mit deinen tatsächlichen Werten
+  await Supabase.initialize(
+    url: 'https://sgauimtpyxqikwuppahe.supabase.co', // DEINE SUPABASE PROJECT URL
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNnYXVpbXRweXhxaWt3dXBwYWhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwMjA4NzksImV4cCI6MjA2NDU5Njg3OX0.6kGegXvsNNJalkCU7p2VgLsd-3cMd_clFMkaFlE3wwM', // DEIN SUPABASE ANON KEY
+    debug: true, // Setze auf false im Produktionsmodus
+  );
 
   // 2️⃣ Initialize Hive and open your cache box
   await Hive.initFlutter();
   await Hive.openBox(PostCacheService.postsBoxName);
 
-  // 3️⃣ Initialize local notifications & FCM listeners
+  // 3️⃣ Initialize local notifications (Firebase Messaging-bezogene Teile wurden bereits entfernt)
   await PushNotificationService.init();
 
-  // 4️⃣ Register the background message handler
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // 5️⃣ Launch the app
+  // 4️⃣ Launch the app
   runApp(
     MultiProvider(
       providers: [
@@ -102,18 +95,17 @@ class _MyAppState extends State<MyApp> {
       // Überprüfe, ob die geladene Locale in den unterstützten Locales enthalten ist
       // (um Probleme zu vermeiden, falls eine nicht unterstützte Sprache gespeichert wurde)
       if (AppLocalizations.supportedLocales.contains(loadedLocale)) {
-         // Wenn die geladene Locale unterstützt wird, aktualisiere den State
+        // Wenn die geladene Locale unterstützt wird, aktualisiere den State
         setState(() {
           _locale = loadedLocale;
         });
       } else {
         // Wenn die geladene Locale nicht unterstützt wird, setze _locale auf null,
         // damit MaterialApp die Gerätesprache verwendet (oder den Fallback)
-         setState(() {
+        setState(() {
           _locale = null;
         });
       }
-
     }
     // Wenn savedLangCode null ist, bleibt _locale null, und MaterialApp verwendet die Gerätesprache
   }

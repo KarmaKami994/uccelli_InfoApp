@@ -3,7 +3,7 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("com.google.gms.google-services")
+    // id("com.google.gms.google-services") // ENTFERNT: Firebase Google Services Plugin
     id("dev.flutter.flutter-gradle-plugin")
 }
 
@@ -13,26 +13,26 @@ android {
 
     defaultConfig {
         applicationId = "com.example.uccelli_info_app"
-        minSdk        = flutter.minSdkVersion
-        targetSdk     = flutter.targetSdkVersion
-        versionCode   = flutter.versionCode
-        versionName   = flutter.versionName
+        minSdk          = flutter.minSdkVersion
+        targetSdk       = flutter.targetSdkVersion
+        versionCode     = flutter.versionCode
+        versionName     = flutter.versionName
     }
 
     // Release signing, picks up the keystore you decode in CI:
     signingConfigs {
         create("release") {
             // your workflow writes this file for us:
-            storeFile     = file("uccelli-release.jks")
+            storeFile       = file("uccelli-release.jks")
             storePassword = System.getenv("KEYSTORE_PASSWORD")
-            keyAlias      = "upload"        // adjust if your alias differs
-            keyPassword   = System.getenv("KEY_PASSWORD")
+            keyAlias        = "upload"    // adjust if your alias differs
+            keyPassword     = System.getenv("KEY_PASSWORD")
         }
     }
 
     buildTypes {
         getByName("release") {
-            signingConfig    = signingConfigs.getByName("release")
+            signingConfig   = signingConfigs.getByName("release")
             isMinifyEnabled   = true
             isShrinkResources = true
             proguardFiles(

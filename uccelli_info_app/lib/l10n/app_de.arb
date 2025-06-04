@@ -4,7 +4,6 @@
   "@appTitle": {
     "description": "Der Titel der Anwendung"
   },
-
   "helloWorld": "Hallo Welt!",
   "settingsPageTitle": "Einstellungen",
   "darkModeSetting": "Dunkelmodus",
@@ -19,8 +18,6 @@
   "versionPrefix": "Version",
   "translateKeyForCouldNotOpenLink": "Link konnte nicht geöffnet werden", 
   "translateKeyForLanguageSetting": "Sprache",
-
-
   "latestPostsTabTitle": "Neueste Posts", 
   "upcomingEventsTabTitle": "Kommende Events", 
   "searchPostsLabel": "Posts suchen", 
@@ -30,5 +27,22 @@
   "noEventsFound": "Keine Events gefunden.",
   "errorLoadingEvents": "Fehler beim Laden der Events:",
   "eventStartsPrefix": "Startet:",
-  "homePageTitle": "Uccelli Society"
+  "homePageTitle": "Uccelli Society",
+  "favoritesPageTitle": "Favoriten",
+  "errorLoadingFavorites": "Fehler beim Laden der Favoriten:",
+  "noFavoritesYet": "Noch keine Favoriten.",
+  "publishedOnPrefix": "Veröffentlicht am:",
+  "sharePostButtonLabel": "Diesen Post teilen",
+  "addToCalendarFunctionEntered": "Funktion aufgerufen!",
+  "errorParsingEventDate": "Fehler beim Parsen des Event-Datums. Ungültiges Datumsformat.",
+  "unexpectedErrorParsingEventData": "Ein unerwarteter Fehler ist beim Parsen der Daten aufgetreten.",
+  "generalErrorAddingToCalendar": "Ein allgemeiner Fehler ist beim Hinzufügen zum Kalender aufgetreten.",
+  "noLinkAvailableForEvent": "Kein Link für dieses Event verfügbar.",
+  "infoSectionTitle": "Info",
+  "timePrefix": "Zeit:",
+  "entryFeePrefix": "Eintritt:",
+  "descriptionSectionTitle": "Beschreibung",
+  "venueSectionTitle": "Veranstaltungsort",
+  "addToCalendarButtonLabel": "Zum Kalender hinzufügen",
+  "joinEventButtonLabel": "Am Event teilnehmen"
 }

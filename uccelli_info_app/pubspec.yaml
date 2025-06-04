@@ -25,8 +25,6 @@ dependencies:
   package_info_plus: ^8.3.0
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  firebase_core: ^3.13.0
-  firebase_messaging: ^15.2.5
   flutter_local_notifications: ^19.1.1
   cupertino_icons: ^1.0.8
   add_2_calendar: ^3.0.1
@@ -36,10 +34,11 @@ dependencies:
   device_info_plus: ^11.4.0
   permission_handler: ^12.0.0
   fluttertoast: ^8.2.5
-  app_settings: ^6.1.1
   html_unescape: ^2.0.0
+  app_settings: ^6.1.1
   flutter_localizations:
     sdk: flutter
+  supabase_flutter: ^2.9.0
 
 dev_dependencies:
   flutter_test:
@@ -51,7 +50,6 @@ flutter_icons:
   android: true
   ios: true
   image_path: "lib/assets/images/logo_light.png"
-
 
 
 flutter:

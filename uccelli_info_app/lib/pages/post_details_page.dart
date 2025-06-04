@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:html/parser.dart' show parse;
+import 'package:html/parser.dart' as html_parser; // Beibehalten für Textbereinigung bei Bedarf
+
+// >>> Importiere generierten Lokalisierungs-Code <<<
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+// <<< Ende Import >>>
 
 import '../providers/theme_provider.dart';
 import '../widgets/custom_app_bar.dart';
@@ -14,15 +18,28 @@ class PostDetailsPage extends StatelessWidget {
 
   const PostDetailsPage({Key? key, required this.post}) : super(key: key);
 
-  String _parseTitle() {
-    return parse(post['title']?['rendered']?.toString() ?? '')
-            .body
-            ?.text ??
-        'No title';
+  // Hilfsfunktion zur Auswahl des Titels basierend auf der Sprache
+  String _getDisplayedTitle(BuildContext context) {
+    final currentLanguageCode = Localizations.localeOf(context).languageCode;
+    final String originalTitle = post['title']?.toString() ?? 'No title';
+    final String? translatedTitle = post['title_en']?.toString();
+
+    if (currentLanguageCode == 'en' && translatedTitle != null && translatedTitle.isNotEmpty) {
+      return translatedTitle;
+    }
+    return originalTitle;
   }
 
-  String _parseContent() {
-    return post['content']?['rendered']?.toString() ?? '';
+  // Hilfsfunktion zur Auswahl des Inhalts basierend auf der Sprache
+  String _getDisplayedContent(BuildContext context) {
+    final currentLanguageCode = Localizations.localeOf(context).languageCode;
+    final String originalContent = post['content']?.toString() ?? '';
+    final String? translatedContent = post['content_en']?.toString();
+
+    if (currentLanguageCode == 'en' && translatedContent != null && translatedContent.isNotEmpty) {
+      return translatedContent;
+    }
+    return originalContent;
   }
 
   String _publishedDate() {
@@ -33,18 +50,10 @@ class PostDetailsPage extends StatelessWidget {
     return raw;
   }
 
-  /// Safely extract the featured image URL from the embedded media
+  /// Safely extract the featured image URL from the Supabase data
   String? _featuredImageUrl() {
-    final embedded = post['_embedded'] as Map<String, dynamic>?;
-    final mediaList = embedded?['wp:featuredmedia'] as List<dynamic>?;
-
-    if (mediaList != null && mediaList.isNotEmpty) {
-      final firstMedia = mediaList[0];
-      if (firstMedia is Map<String, dynamic>) {
-        return firstMedia['source_url'] as String?;
-      }
-    }
-    return null;
+    // In Supabase sollte die URL direkt im Feld 'featured_media_url' sein
+    return post['featured_media_url'] as String?;
   }
 
   void _share(BuildContext context, String title, String link) {
@@ -55,9 +64,10 @@ class PostDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final l10n = AppLocalizations.of(context)!; // Lokalisierung hinzufügen
 
-    final title = _parseTitle();
-    final contentHtml = _parseContent();
+    final title = _getDisplayedTitle(context); // Verwende die neue Hilfsfunktion
+    final contentHtml = _getDisplayedContent(context); // Verwende die neue Hilfsfunktion
     final date = _publishedDate();
     final imageUrl = _featuredImageUrl();
     final link = post['link']?.toString() ?? '';
@@ -65,7 +75,7 @@ class PostDetailsPage extends StatelessWidget {
     return Scaffold(
       appBar: customAppBar(
         context,
-        title: title,
+        title: title, // App Bar Titel ist der ausgewählte Titel
         actions: [
           IconButton(
             icon: Icon(themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode),
@@ -99,14 +109,14 @@ class PostDetailsPage extends StatelessWidget {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               // Published date
               Text(
-                'Veröffentlicht am: $date',
+                '${l10n.publishedOnPrefix} $date', // Lokalisierung hinzufügen
                 style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
               ),
 
               const SizedBox(height: 16),
 
               // HTML content
-              Html(data: contentHtml),
+              Html(data: contentHtml), // Render the selected content
 
               const SizedBox(height: 24),
 
@@ -114,7 +124,7 @@ class PostDetailsPage extends StatelessWidget {
               Center(
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.share),
-                  label: const Text('Share this Post'),
+                  label: Text(l10n.sharePostButtonLabel), // Lokalisierung hinzufügen
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
