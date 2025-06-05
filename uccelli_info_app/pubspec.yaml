@@ -2,7 +2,7 @@ name: uccelli_info_app
 description: "Welcome to the Uccelli Society"
 publish_to: 'none'
 
-version: 1.0.44+1
+version: 1.0.46+1
 
 environment:
   sdk: '>=3.7.2 <4.0.0'
@@ -45,6 +45,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.10.0
+  flutter_gen: ^5.10.0
 
 flutter_icons:
   android: true
