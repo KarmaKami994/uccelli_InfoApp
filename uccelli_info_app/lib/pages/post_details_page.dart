@@ -7,7 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:html/parser.dart' as html_parser; // Beibehalten für Textbereinigung bei Bedarf
 
 // >>> Importiere generierten Lokalisierungs-Code <<<
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:uccelli_info_app/gen_l10n/app_localizations.dart';
 // <<< Ende Import >>>
 
 import '../providers/theme_provider.dart';

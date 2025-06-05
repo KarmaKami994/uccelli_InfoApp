@@ -1,21 +1,6 @@
 # Logs
 logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-firebase-debug.log*
-firebase-debug.*.log*
-
-# Firebase cache
-.firebase/
-
-# Firebase config
-
-# Uncomment this if you'd like others to create their own Firebase project.
-# For a team working on the same Firebase project(s), it is recommended to leave
-# it commented so all members can deploy to the same project(s) in .firebaserc.
-# .firebaserc
 
 # Runtime data
 pids
@@ -47,15 +32,6 @@ build/Release
 # Dependency directories
 node_modules/
 
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Optional REPL history
-.node_repl_history
-
 # Output of 'npm pack'
 *.tgz
 
@@ -67,3 +43,67 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# Flutter / Dart specific files
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+*.bak
+*.class
+*.jar
+*.obj
+*.o
+*.so
+*.dex
+*.apk
+*.aab
+*.snap
+*.dill
+*.trace
+*.jks
+*.keystore
+*.cer
+*.p12
+*.json
+*.pem
+*.properties
+.gradle/
+.lock
+.metadata
+.project
+.settings/
+.classpath
+.cproject
+.external_build_cache
+.DS_Store
+.xcworkspace/
+.xcscmblueprint
+.symlinks
+.buildlog/
+.fvm/
+.local_history/
+.dart_tool/
+.app/
+.pub-cache/
+.flutter-plugins-ready
+.flutter-plugin-packages
+
+# Ignored Flutter/Dart specific build/generated directories
+# By default, Flutter generates files in .dart_tool.
+# We explicitly allow gen_l10n to be tracked for CI workaround.
+# If you want to exclude ALL generated files again, uncomment this line.
+# /.dart_tool/
+
+# For generated localization files:
+# We need to explicitly NOT ignore the gen_l10n folder for the CI workaround.
+# This ensures that `git add .dart_tool/flutter_gen/gen_l10n/` actually adds the files.
+# Make sure NO OTHER rule above this one implicitly ignores this path.
+# If you have specific exclusion rules for `.dart_tool/flutter_gen/` or similar,
+# you might need to adjust them to specifically exclude everything EXCEPT gen_l10n.
+# Example: If you had `/.dart_tool/flutter_gen/` you'd remove it.
+# The `/.dart_tool/` line (commented above) is the most common one.

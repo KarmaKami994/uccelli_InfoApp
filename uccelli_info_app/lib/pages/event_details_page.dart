@@ -9,7 +9,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // >>> Importiere generierten Lokalisierungs-Code <<<
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:uccelli_info_app/gen_l10n/app_localizations.dart';
 // <<< Ende Import >>>
 
 import '../providers/theme_provider.dart';

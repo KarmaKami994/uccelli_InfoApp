@@ -25,6 +25,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 // NEU: Supabase Import
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uccelli_info_app/gen_l10n/app_localizations.dart';
 
 
 Future<void> main() async {
