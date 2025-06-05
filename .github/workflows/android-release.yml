@@ -3,22 +3,22 @@ name: '📦 Build & Release APK'
 on:
   push:
     tags:
-      - 'v*'             # anything like v1.2.3
+      - 'v*'            # anything like v1.2.3
   workflow_dispatch:    # allow manual runs too
 
 permissions:
   contents: write       # needed to create releases & upload assets
 
 env:
-  REPO: ${{ github.repository }}     # owner/repo
-  TAG:  ${{ github.ref_name }}       # e.g. "v1.2.3"
+  REPO: ${{ github.repository }}    # owner/repo
+  TAG:  ${{ github.ref_name }}      # e.g. "v1.2.3"
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
 
     env:
-      JKS_BASE64:        ${{ secrets.JKS_BASE64 }}
+      JKS_BASE64:         ${{ secrets.JKS_BASE64 }}
       KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
       KEY_PASSWORD:      ${{ secrets.KEY_PASSWORD }}
 
@@ -64,6 +64,12 @@ jobs:
         working-directory: uccelli_info_app # In das Projektverzeichnis wechseln
         run: flutter pub get
       # >>> Ende working-directory <<<
+
+      # NEU HINZUGEFÜGT: Schritt zum Generieren der Lokalisierungsdateien
+      - name: Generate localization files
+        working-directory: uccelli_info_app
+        run: flutter gen-l10n # Erzwingt die Generierung der Lokalisierungsdateien
+
 
       # >>> working-directory KORRIGIERT auf uccelli_info_app <<<
       - name: Build release APK
