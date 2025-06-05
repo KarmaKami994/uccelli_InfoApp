@@ -36,8 +36,7 @@ jobs:
         uses: subosito/flutter-action@v1
         with:
           channel: stable
-          # Optional: Du könntest hier caching für das Flutter SDK aktivieren:
-          # cache: true
+          cache: true # NEU: Caching für Flutter SDK und pub-cache aktivieren
 
       - name: Add Android SDK cmdline-tools to PATH # Fix für sdkmanager not found
         run: echo "PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
@@ -58,29 +57,34 @@ jobs:
           yes | sdkmanager --licenses
       # >>> Ende working-directory <<<
 
-
-      # >>> working-directory KORRIGIERT auf uccelli_info_app <<<
-      - name: Get Flutter dependencies
-        working-directory: uccelli_info_app # In das Projektverzeichnis wechseln
-        run: flutter pub get
-      # >>> Ende working-directory <<<
-
-      # NEU HINZUGEFÜGT: Schritt zum Generieren der Lokalisierungsdateien
-      - name: Generate localization files
+      # NEU HINZUGEFÜGT: Robuste Schritte für Abhängigkeiten und Lokalisierung
+      - name: Clean Flutter project
         working-directory: uccelli_info_app
-        run: flutter gen-l10n # Erzwingt die Generierung der Lokalisierungsdateien
+        run: flutter clean
 
+      - name: Clear Flutter pub cache # NEU: Expliziter Schritt zum Bereinigen des pub-caches
+        working-directory: uccelli_info_app
+        run: flutter pub cache clean --force
+
+      - name: Get Flutter dependencies (verbose)
+        working-directory: uccelli_info_app
+        run: flutter pub get --verbose
+
+      - name: Generate localization files (verbose)
+        working-directory: uccelli_info_app
+        run: flutter gen-l10n --verbose
+      # ENDE NEU HINZUGEFÜGT
 
       # >>> working-directory KORRIGIERT auf uccelli_info_app <<<
       - name: Build release APK
-        working-directory: uccelli_info_app # In das Projektverzeichnis wechseln
+        working-directory: uccelli_info_app
         run: flutter build apk --release
       # >>> Ende working-directory <<<
 
       # >>> working-directory KORRIGIERT auf uccelli_info_app (für Zugriff auf build Output) <<<
       - name: Create GitHub Release via REST API
         id: create_release
-        working-directory: uccelli_info_app # In das Projektverzeichnis wechseln
+        working-directory: uccelli_info_app
         run: |
           response=$(curl -s -X POST \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
@@ -94,7 +98,7 @@ jobs:
 
       # >>> working-directory KORRIGIERT auf uccelli_info_app (für Zugriff auf build Output) <<<
       - name: Upload APK asset via REST API
-        working-directory: uccelli_info_app # In das Projektverzeichnis wechseln
+        working-directory: uccelli_info_app
         run: |
           curl -s -X POST \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
