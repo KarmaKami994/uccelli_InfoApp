@@ -49,18 +49,20 @@ jobs:
           flutter pub get
           flutter gen-l10n
 
-      # 6. Flutter App als Release APK bauen
+      # 6. Flutter App als Release APK bauen (MIT DEM KORREKTEN BEFEHL)
       - name: Build Flutter App
-        run: flutter build apk --release
+        run: ./android/gradlew assembleRelease
 
-      # 7. Release-Artefakt umbenennen (z.B. zu uccelli-app-v1.0.2.apk)
+      # 7. Release-Artefakt umbenennen
+      # Der Pfad hier ist relativ zum working-directory
       - name: Rename release artifact
-        run: mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/uccelli-app-${{ github.ref_name }}.apk
+        run: mv android/app/build/outputs/apk/release/app-release.apk android/app/build/outputs/apk/release/uccelli-app-${{ github.ref_name }}.apk
 
       # 8. GitHub Release erstellen und APK hochladen
+      # Der Pfad hier muss vom Projekt-Root aus gehen
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: uccelli_info_app/build/app/outputs/flutter-apk/uccelli-app-${{ github.ref_name }}.apk
+          files: uccelli_info_app/android/app/build/outputs/apk/release/uccelli-app-${{ github.ref_name }}.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
