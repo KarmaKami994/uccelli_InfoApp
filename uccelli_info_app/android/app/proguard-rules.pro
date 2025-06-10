@@ -23,9 +23,9 @@
 # Verwende dies, wenn die spezifischeren Regeln nicht funktioniert haben. Dies könnte die APK-Größe erhöhen.
 -keep class androidx.window.** { *; }
 -keep class androidx.window.** {
-  <fields>;
-  <methods>;
-  <init>();
+    <fields>;
+    <methods>;
+    <init>();
 }
 
 # Add dontwarn rules for androidx.window packages
