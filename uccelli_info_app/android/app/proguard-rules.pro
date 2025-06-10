@@ -7,14 +7,25 @@
 # To enable R8 tracing, add the following flag:
 # -printconfiguration ./r8-configuration.txt
 
+# --- NEU HINZUGEFÜGT ---
+# Behebt den R8 Build-Fehler "Attribute InnerClasses requires EnclosingMethod attribute".
+# Diese Regel weist R8 an, wichtige Metadaten in den Java-Klassendateien beizubehalten,
+# die von einigen Bibliotheken benötigt werden.
+-keepattributes InnerClasses,EnclosingMethod
+
+
+# -----------------------------------------------------------------------------------
+# Bestehende Regeln (wichtig für androidx.window, etc.)
+# -----------------------------------------------------------------------------------
+
 # SEHR BREITE Keep rules for androidx.window (Versuch, wenn spezifische Regeln fehlschlagen)
 # Dies versucht, alle Klassen, Felder, Methoden und Konstruktoren im androidx.window Paket und Unterpaketen zu behalten.
 # Verwende dies, wenn die spezifischeren Regeln nicht funktioniert haben. Dies könnte die APK-Größe erhöhen.
 -keep class androidx.window.** { *; }
 -keep class androidx.window.** {
-  <fields>;
-  <methods>;
-  <init>();
+  <fields>;
+  <methods>;
+  <init>();
 }
 
 # Add dontwarn rules for androidx.window packages
