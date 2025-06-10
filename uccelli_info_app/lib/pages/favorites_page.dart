@@ -6,7 +6,7 @@ import '../widgets/custom_app_bar.dart';
 import 'post_details_page.dart';
 
 // >>> Importiere generierten Lokalisierungs-Code <<<
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:uccelli_info_app/gen_l10n/app_localizations.dart';
 // <<< Ende Import >>>
 
 class FavoritesPage extends StatefulWidget {

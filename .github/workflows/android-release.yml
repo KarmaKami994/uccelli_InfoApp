@@ -36,55 +36,48 @@ jobs:
         uses: subosito/flutter-action@v1
         with:
           channel: stable
-          # cache: true # NEU: Caching für Flutter SDK und pub-cache WIRD JETZT DEAKTIVIERT, um Inkonsistenzen zu vermeiden
-          # Da das Problem so hartnäckig ist, erzwingen wir einen frischen Start bei jedem Run.
-          # Diese Zeile wurde auskommentiert/entfernt.
+          cache: true # NEU: Caching für Flutter SDK und pub-cache aktiviert
 
 
       - name: Add Android SDK cmdline-tools to PATH # Fix für sdkmanager not found
         run: echo "PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
 
-      # >>> Keystore-Pfad KORRIGIERT auf uccelli_info_app <<<
+      # Keystore-Pfad
       - name: Decode & install keystore
         run: |
-          mkdir -p uccelli_info_app/android/app # Verzeichnis im Projekt erstellen (relativ zum Repo-Root)
-          echo "$JKS_BASE64" | base64 --decode \
-            > uccelli_info_app/android/app/uccelli-release.jks # Keystore im Projekt ablegen (relativ zum Repo-Root)
-      # >>> Ende Korrektur Keystore-Pfad <<<
+          mkdir -p uccelli_info_app/android/app
+          echo "$JKS_BASE64" | base64 --decode > uccelli_info_app/android/app/uccelli-release.jks
 
-      # >>> working-directory KORRIGIERT auf uccelli_info_app <<<
+      # Android SDK Lizenzen
       - name: Accept Android SDK licenses
-        working-directory: uccelli_info_app # In das Projektverzeichnis wechseln (damit sdkmanager in der richtigen Umgebung läuft, falls nötig)
+        working-directory: uccelli_info_app
         run: |
           yes | sdkmanager --install "platform-tools" "platforms;android-33" "cmdline-tools;latest"
           yes | sdkmanager --licenses
-      # >>> Ende working-directory <<<
 
-      # NEU HINZUGEFÜGT: Robuste Schritte für Abhängigkeiten und Lokalisierung
+      # Robuste Schritte für Abhängigkeiten und Lokalisierung
       - name: Clean Flutter project
         working-directory: uccelli_info_app
         run: flutter clean
 
-      - name: Clear Flutter pub cache # NEU: Expliziter Schritt zum Bereinigen des pub-caches
+      - name: Clear Flutter pub cache
         working-directory: uccelli_info_app
-        run: flutter pub cache clean --force # Erzwingt die Bereinigung des gesamten Caches
+        run: flutter pub cache clean --force
 
       - name: Get Flutter dependencies (verbose)
         working-directory: uccelli_info_app
         run: flutter pub get --verbose
-
-      - name: Generate localization files (verbose)
+      
+      - name: Generate localization files (verbose) # Dieser Schritt ist notwendig, damit die L10N-Dateien generiert werden
         working-directory: uccelli_info_app
         run: flutter gen-l10n --verbose
-      # ENDE NEU HINZUGEFÜGT
 
-      # >>> working-directory KORRIGIERT auf uccelli_info_app <<<
+      # Build APK
       - name: Build release APK
         working-directory: uccelli_info_app
         run: flutter build apk --release
-      # >>> Ende working-directory <<<
 
-      # >>> working-directory KORRIGIERT auf uccelli_info_app (für Zugriff auf build Output) <<<
+      # GitHub Release erstellen
       - name: Create GitHub Release via REST API
         id: create_release
         working-directory: uccelli_info_app
@@ -97,9 +90,8 @@ jobs:
           echo "$response"
           upload_url=$(echo "$response" | jq -r .upload_url | sed -e "s/{.*}//")
           echo "UPLOAD_URL=$upload_url" >> $GITHUB_ENV
-      # >>> Ende working-directory <<<
 
-      # >>> working-directory KORRIGIERT auf uccelli_info_app (für Zugriff auf build Output) <<<
+      # APK Asset hochladen
       - name: Upload APK asset via REST API
         working-directory: uccelli_info_app
         run: |
@@ -108,4 +100,3 @@ jobs:
             -H "Content-Type: application/vnd.android.package-archive" \
             --data-binary @build/app/outputs/flutter-apk/app-release.apk \
             "${UPLOAD_URL}?name=uccelli-info-app-${TAG}.apk"
-      # >>> Ende working-directory <<<

@@ -7,9 +7,11 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 // >>> Importiere generierten Lokalisierungs-Code <<<
 import 'package:uccelli_info_app/gen_l10n/app_localizations.dart';
 // <<< Ende Import >>>
+
 
 // Importiere main.dart, um auf MyAppState zuzugreifen
 import '../main.dart'; // <-- Import hinzufügen

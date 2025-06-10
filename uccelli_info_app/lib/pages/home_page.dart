@@ -10,12 +10,9 @@ import 'dart:io';
 import 'package:open_filex/open_filex.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:uccelli_info_app/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-
-// >>> Importiere generierten Lokalisierungs-Code <<<
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-// <<< Ende Import >>>
 
 import '../providers/theme_provider.dart';
 import '../providers/favorites_provider.dart';

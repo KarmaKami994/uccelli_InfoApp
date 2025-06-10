@@ -19,13 +19,12 @@ import 'providers/favorites_provider.dart';
 import 'pages/splash_screen.dart';
 
 // >>> Importiere generierten Lokalisierungs-Code <<<
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:uccelli_info_app/gen_l10n/app_localizations.dart';
 // >>> Importiere Standard Lokalisierungs-Delegates <<<
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 // NEU: Supabase Import
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:uccelli_info_app/gen_l10n/app_localizations.dart';
 
 
 Future<void> main() async {
