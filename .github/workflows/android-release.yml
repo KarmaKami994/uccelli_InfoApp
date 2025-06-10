@@ -1,110 +1,69 @@
-name: '📦 Build & Release APK'
+name: Flutter CI - Android Release
 
+# Dieser Workflow wird ausgelöst, wenn ein neuer Tag gepusht wird, der mit 'v' beginnt (z.B. v1.0.0, v1.2.3)
 on:
   push:
     tags:
-      - 'v*'            # anything like v1.2.3
-  workflow_dispatch:    # allow manual runs too
-
-permissions:
-  contents: write       # needed to create releases & upload assets
-
-env:
-  REPO: ${{ github.repository }}    # owner/repo
-  TAG:  ${{ github.ref_name }}      # e.g. "v1.2.3"
+      - 'v*.*.*'
 
 jobs:
-  build-and-release:
+  build:
     runs-on: ubuntu-latest
-
-    env:
-      JKS_BASE64:         ${{ secrets.JKS_BASE64 }}
-      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-      KEY_PASSWORD:      ${{ secrets.KEY_PASSWORD }}
-
     steps:
-      - name: Check out code
+      # 1. Code auschecken
+      # Holt den Code aus Ihrem Repository in den Runner.
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java 17
-        uses: actions/setup-java@v3
+      # 2. Java Development Kit (JDK) einrichten
+      # Stellt sicher, dass die korrekte Java-Version (hier 17) für den Gradle-Build verwendet wird.
+      # Dies ist stabiler als sich auf die Standard-Java-Version des Runners zu verlassen.
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          distribution: temurin
           java-version: '17'
+          distribution: 'temurin'
 
-      - name: Set up Flutter (stable channel)
-        uses: subosito/flutter-action@v1
+      # 3. Flutter SDK einrichten
+      # Lädt die exakte Flutter-Version herunter, die Sie im Projekt verwenden (aus Ihrem Bericht entnommen).
+      # Das 'cache: true' optimiert zukünftige Builds, indem es das Flutter SDK zwischenspeichert.
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
-          channel: stable
-          cache: true # Caching für Flutter SDK und pub-cache
+          flutter-version: '3.29.3' # Gemäss Ihrem Statusbericht
+          channel: 'stable'
+          cache: true
 
-      - name: Add Android SDK cmdline-tools to PATH
-        run: echo "PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
+      # 4. (NEU & WICHTIG) Ausführungsrechte für Gradle Wrapper setzen
+      # Dies behebt das Gradle-Versionsproblem, indem sichergestellt wird, dass der Runner
+      # den Wrapper verwenden kann (und muss), der die korrekte Version (8.9) herunterlädt.
+      - name: Grant execute permission for gradlew
+        run: chmod +x android/gradlew
 
-      # Keystore-Pfad
-      - name: Decode & install keystore
+      # 5. (NEU & WICHTIG) Abhängigkeiten installieren und Code generieren
+      # Führt alle notwendigen Vorbereitungsschritte in der korrekten Reihenfolge aus.
+      - name: Install dependencies and generate files
         run: |
-          mkdir -p uccelli_info_app/android/app
-          echo "$JKS_BASE64" | base64 --decode > uccelli_info_app/android/app/uccelli-release.jks
+          flutter pub get
+          flutter gen-l10n
 
-      # Android SDK Lizenzen
-      - name: Accept Android SDK licenses
-        working-directory: uccelli_info_app
-        run: |
-          yes | sdkmanager --install "platform-tools" "platforms;android-33" "cmdline-tools;latest"
-          yes | sdkmanager --licenses
-
-      # Robuste Schritte für Abhängigkeiten und Lokalisierung
-      - name: Clean Flutter project
-        working-directory: uccelli_info_app
-        run: flutter clean
-
-      - name: Clear Flutter pub cache
-        working-directory: uccelli_info_app
-        run: flutter pub cache clean --force
-
-      - name: Get Flutter dependencies (verbose)
-        working-directory: uccelli_info_app
-        run: flutter pub get --verbose
-      
-      - name: Generate localization files (verbose)
-        working-directory: uccelli_info_app
-        run: flutter gen-l10n --verbose
-
-      # NEU HINZUGEFÜGT: Gradle Cache leeren und Wrapper neu initialisieren
-      - name: Clean Gradle cache and ensure wrapper is executable
-        working-directory: uccelli_info_app/android # Wichtig: In das Android-Modul wechseln
-        run: |
-          # Lösche den Gradle-Cache
-          rm -rf ~/.gradle/caches/
-          # Stelle sicher, dass der Gradle Wrapper ausführbar ist
-          chmod +x ./gradlew
-
-      # Build APK
-      - name: Build release APK
-        working-directory: uccelli_info_app
+      # 6. Flutter App bauen (Release APK)
+      # Startet den eigentlichen Build-Prozess. Da 'gen-l10n' vorher lief, werden die
+      # Lokalisierungsdateien jetzt korrekt gefunden.
+      - name: Build Flutter App
         run: flutter build apk --release
 
-      # GitHub Release erstellen
-      - name: Create GitHub Release via REST API
-        id: create_release
-        working-directory: uccelli_info_app
-        run: |
-          response=$(curl -s -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            https://api.github.com/repos/$REPO/releases \
-            -d "{\"tag_name\":\"$TAG\",\"name\":\"Release $TAG\",\"draft\":false,\"prerelease\":false}")
-          echo "$response"
-          upload_url=$(echo "$response" | jq -r .upload_url | sed -e "s/{.*}//")
-          echo "UPLOAD_URL=$upload_url" >> $GITHUB_ENV
+      # 7. Release-Artefakt umbenennen und vorbereiten
+      # Benennt die APK-Datei um, damit sie die Versionsnummer aus dem Git-Tag enthält.
+      # Z.B. wird aus app-release.apk -> uccelli-app-v1.0.1.apk
+      - name: Rename release artifact
+        run: mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/uccelli-app-${{ github.ref_name }}.apk
 
-      # APK Asset hochladen
-      - name: Upload APK asset via REST API
-        working-directory: uccelli_info_app
-        run: |
-          curl -s -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/vnd.android.package-archive" \
-            --data-binary @build/app/outputs/flutter-apk/app-release.apk \
-            "${UPLOAD_URL}?name=uccelli-info-app-${TAG}.apk"
+      # 8. Release auf GitHub erstellen
+      # Erstellt einen neuen Release auf Ihrer GitHub-Seite und lädt die umbenannte APK-Datei dorthin hoch.
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/app/outputs/flutter-apk/uccelli-app-${{ github.ref_name }}.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
