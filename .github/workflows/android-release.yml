@@ -36,10 +36,9 @@ jobs:
         uses: subosito/flutter-action@v1
         with:
           channel: stable
-          cache: true # NEU: Caching für Flutter SDK und pub-cache aktiviert
+          cache: true # Caching für Flutter SDK und pub-cache
 
-
-      - name: Add Android SDK cmdline-tools to PATH # Fix für sdkmanager not found
+      - name: Add Android SDK cmdline-tools to PATH
         run: echo "PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV
 
       # Keystore-Pfad
@@ -68,9 +67,18 @@ jobs:
         working-directory: uccelli_info_app
         run: flutter pub get --verbose
       
-      - name: Generate localization files (verbose) # Dieser Schritt ist notwendig, damit die L10N-Dateien generiert werden
+      - name: Generate localization files (verbose)
         working-directory: uccelli_info_app
         run: flutter gen-l10n --verbose
+
+      # NEU HINZUGEFÜGT: Gradle Cache leeren und Wrapper neu initialisieren
+      - name: Clean Gradle cache and ensure wrapper is executable
+        working-directory: uccelli_info_app/android # Wichtig: In das Android-Modul wechseln
+        run: |
+          # Lösche den Gradle-Cache
+          rm -rf ~/.gradle/caches/
+          # Stelle sicher, dass der Gradle Wrapper ausführbar ist
+          chmod +x ./gradlew
 
       # Build APK
       - name: Build release APK
