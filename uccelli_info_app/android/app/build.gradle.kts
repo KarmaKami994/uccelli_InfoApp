@@ -2,7 +2,7 @@
 
 plugins {
     id("com.android.application")
-    id("kotlin-android")
+    id("kotlin-android") // Kotlin Android Plugin
     // id("com.google.gms.google-services") // ENTFERNT: Firebase Google Services Plugin
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -19,13 +19,12 @@ android {
         versionName     = flutter.versionName
     }
 
-    // Release signing, picks up the keystore you decode in CI:
+    // Release signing
     signingConfigs {
         create("release") {
-            // your workflow writes this file for us:
             storeFile       = file("uccelli-release.jks")
             storePassword = System.getenv("KEYSTORE_PASSWORD")
-            keyAlias        = "upload"    // adjust if your alias differs
+            keyAlias        = "upload"
             keyPassword     = System.getenv("KEY_PASSWORD")
         }
     }
@@ -40,21 +39,19 @@ android {
                 "proguard-rules.pro"
             )
         }
-        // debug stays default
     }
 
-    // Java 11 + core-library desugaring
+    // Java & Kotlin Kompatibilität
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8 // Setze auf Java 8 Kompatibilität
+        targetCompatibility = JavaVersion.VERSION_1_8
         isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "1.8" // Setze jvmTarget auf 1.8 für breitere Kompatibilität
     }
 
-    // Align with your plugins
-    ndkVersion = "27.0.12077973"
+    ndkVersion = "27.0.12077973" // Beibehalten, da es im Build-Log installiert wurde
 }
 
 flutter {
@@ -62,6 +59,5 @@ flutter {
 }
 
 dependencies {
-    // for Java 8+ library support
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

@@ -10,9 +10,10 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // Android Gradle plugin (if not already provided via settings/pluginManagement)
-        classpath("com.android.tools.build:gradle:7.4.2")
-        // Firebase Google Services plugin (ENTFERNT)
+        // Android Gradle plugin: Aktualisiert auf 8.3.2 (kompatibel mit Kotlin 1.9.0+)
+        classpath("com.android.tools.build:gradle:8.3.2")
+        // Kotlin Gradle plugin: Aktualisiert auf eine Version, die mit AGP 8.3.2 kompatibel ist
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0") // Oder eine neuere, falls 1.9.0 Probleme macht
     }
 }
 
