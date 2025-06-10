@@ -1,3 +1,8 @@
+# ===================================================================
+# THIS IS AN UPDATED VERSION
+# I've added exceptions (!) at the end for required build files.
+# ===================================================================
+
 # Logs
 logs
 *.log
@@ -55,6 +60,7 @@ node_modules/
 *.ipr
 *.bak
 *.class
+# We will ignore all .jar files EXCEPT the one needed for Gradle
 *.jar
 *.obj
 *.o
@@ -71,6 +77,7 @@ node_modules/
 *.p12
 *.json
 *.pem
+# We will ignore all .properties files EXCEPT those needed for Gradle
 *.properties
 .gradle/
 .lock
@@ -93,17 +100,16 @@ node_modules/
 .flutter-plugins-ready
 .flutter-plugin-packages
 
-# Ignored Flutter/Dart specific build/generated directories
-# By default, Flutter generates files in .dart_tool.
-# We explicitly allow gen_l10n to be tracked for CI workaround.
-# If you want to exclude ALL generated files again, uncomment this line.
-# /.dart_tool/
+# ===================================================================
+# DO NOT IGNORE - Required files for CI/CD Builds
+# ===================================================================
+# Keep the Gradle Wrapper executable scripts
+!gradlew
+!gradlew.bat
 
-# For generated localization files:
-# We need to explicitly NOT ignore the gen_l10n folder for the CI workaround.
-# This ensures that `git add .dart_tool/flutter_gen/gen_l10n/` actually adds the files.
-# Make sure NO OTHER rule above this one implicitly ignores this path.
-# If you have specific exclusion rules for `.dart_tool/flutter_gen/` or similar,
-# you might need to adjust them to specifically exclude everything EXCEPT gen_l10n.
-# Example: If you had `/.dart_tool/flutter_gen/` you'd remove it.
-# The `/.dart_tool/` line (commented above) is the most common one.
+# Keep the Gradle Wrapper JAR file
+!**/gradle-wrapper.jar
+
+# Keep the Gradle Wrapper and AndroidX configuration files
+!gradle.properties
+!**/gradle-wrapper.properties
