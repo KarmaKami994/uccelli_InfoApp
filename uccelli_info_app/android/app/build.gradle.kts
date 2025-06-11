@@ -1,29 +1,48 @@
+// Dieser Block sagt Gradle, wo es die Bibliothek zum Lesen von YAML-Dateien findet.
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.yaml:snakeyaml:2.2")
+    }
+}
+
 import java.util.Properties
 import java.io.FileInputStream
+import org.yaml.snakeyaml.Yaml
+
+// --- FINALE VERSIONSLOGIK ---
+// Priorisiert die vom Flutter-Tool bereitgestellte Version, mit Fallback auf pubspec.yaml für CI.
+
+// 1. Versuche, die Version aus local.properties zu lesen (Standard für `flutter run`)
+val localProperties = Properties()
+val localPropertiesFile = project.rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+val flutterVersionName = localProperties.getProperty("flutter.versionName")
+val flutterVersionCode = localProperties.getProperty("flutter.versionCode")
+
+// 2. Lese die Version aus pubspec.yaml als Fallback
+fun getPubspecVersion(): Pair<String, Int> {
+    val pubspecFile = rootProject.file("../pubspec.yaml")
+    val pubspecMap = Yaml().load<Map<String, Any>>(pubspecFile.inputStream())
+    val versionString = pubspecMap["version"] as String
+    return versionString.split("+").let {
+        val name = it[0]
+        val code = it.getOrNull(1)?.toInt() ?: 1
+        name to code
+    }
+}
+val (pubspecVersionName, pubspecVersionCode) = getPubspecVersion()
 
 // Lade die Keystore-Properties, falls die Datei existiert (für lokale Builds)
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties()
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-}
-
-// Lese die Version aus der von Flutter generierten local.properties-Datei.
-// Dies ist die Standardmethode und funktioniert sowohl lokal als auch in CI/CD.
-val localProperties = Properties()
-val localPropertiesFile = project.rootProject.file("local.properties")
-if (localPropertiesFile.exists()) {
-    localProperties.load(localPropertiesFile.inputStream())
-}
-
-val flutterVersionCode = localProperties.getProperty("flutter.versionCode")
-if (flutterVersionCode == null) {
-    throw GradleException("flutter.versionCode not found. Please run 'flutter pub get' in your project directory.")
-}
-
-val flutterVersionName = localProperties.getProperty("flutter.versionName")
-if (flutterVersionName == null) {
-    throw GradleException("flutter.versionName not found. Please run 'flutter pub get' in your project directory.")
 }
 
 
@@ -59,9 +78,9 @@ android {
         applicationId = "com.example.uccelli_info_app"
         minSdk = 21
         targetSdk = 33
-        // Lese die Version aus local.properties.
-        versionCode = flutterVersionCode.toInt()
-        versionName = flutterVersionName
+        // Verwende die robuste Versionslogik
+        versionCode = flutterVersionCode?.toInt() ?: pubspecVersionCode
+        versionName = flutterVersionName ?: pubspecVersionName
     }
 
     // Signing-Konfiguration für Release-Builds
