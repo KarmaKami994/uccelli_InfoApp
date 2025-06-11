@@ -1,5 +1,6 @@
 import java.util.Properties
 import java.io.FileInputStream
+import org.yaml.snakeyaml.Yaml
 
 // Lade die Keystore-Properties, falls die Datei existiert (für lokale Builds)
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -8,23 +9,23 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+// Lese Version aus pubspec.yaml
+val pubspecFile = rootProject.file("../pubspec.yaml")
+val pubspecMap = Yaml().load<Map<String, Any>>(pubspecFile.inputStream())
+val versionString = pubspecMap["version"] as String
+val (versionName, versionCode) = versionString.split("+").let {
+    val name = it[0]
+    val code = it.getOrNull(1)?.toInt() ?: 1
+    name to code
+}
+
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-fun localProperties(): Properties {
-    val properties = Properties()
-    val localPropertiesFile = project.rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        properties.load(localPropertiesFile.inputStream())
-    }
-    return properties
-}
-
-val flutterVersionCode: String? by localProperties()
-val flutterVersionName: String? by localProperties()
 
 android {
     namespace = "com.example.uccelli_info_app"
@@ -50,15 +51,15 @@ android {
         applicationId = "com.example.uccelli_info_app"
         minSdk = 21
         targetSdk = 33
-        versionCode = flutterVersionCode?.toInt() ?: 1
-        versionName = flutterVersionName ?: "1.0"
+        // Verwende die Version aus pubspec.yaml
+        this.versionCode = versionCode
+        this.versionName = versionName
     }
 
     // Signing-Konfiguration für Release-Builds
     signingConfigs {
         create("release") {
             // Lese Werte aus keystore.properties oder aus GitHub Secrets (CI-Umgebungsvariablen)
-            // HIER WURDE DER PFAD ANGEPASST
             storeFile = file(System.getenv("KEYSTORE_FILE") ?: keystoreProperties["storeFile"] as String? ?: "../upload-keystore.jks")
             storePassword = System.getenv("KEY_STORE_PASSWORD") ?: keystoreProperties["storePassword"] as String?
             keyAlias = System.getenv("KEY_ALIAS") ?: keystoreProperties["keyAlias"] as String?
