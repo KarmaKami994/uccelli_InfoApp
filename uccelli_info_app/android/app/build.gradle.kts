@@ -1,3 +1,15 @@
+// --- HIER IST DIE KORREKTUR ---
+// Dieser Block sagt Gradle, wo es die Bibliothek zum Lesen von YAML-Dateien findet.
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.yaml:snakeyaml:2.2")
+    }
+}
+
 import java.util.Properties
 import java.io.FileInputStream
 import org.yaml.snakeyaml.Yaml
