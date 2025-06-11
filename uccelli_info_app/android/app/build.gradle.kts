@@ -41,12 +41,12 @@ plugins {
 
 android {
     namespace = "com.example.uccelli_info_app"
-    // --- KORREKTUR 1: SDK- und NDK-Versionen erhöht ---
+    // SDK- und NDK-Versionen sind jetzt korrekt.
     compileSdk = 35
     ndkVersion = "27.0.12077973"
 
     compileOptions {
-        // --- KORREKTUR 2: Desugaring aktiviert ---
+        // Desugaring ist aktiviert.
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -97,6 +97,6 @@ flutter {
 }
 
 dependencies {
-    // --- KORREKTUR 3: Desugaring-Bibliothek hinzugefügt ---
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
