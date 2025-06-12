@@ -2,7 +2,7 @@ name: uccelli_info_app
 description: "Welcome to the Uccelli Society"
 publish_to: 'none'
 
-version: 1.0.62+1
+version: 1.0.63+1
 
 environment:
   sdk: '>=3.7.2 <4.0.0'
@@ -39,6 +39,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   supabase_flutter: ^2.9.0
+  onesignal_flutter: ^5.3.3 # oder die neueste Version
 
 dev_dependencies:
   flutter_test:

@@ -1,75 +1,54 @@
 // lib/services/push_notification_service.dart
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
-// --- KORREKTUR 1: Callback-Funktionen auf die oberste Ebene verschoben ---
-// Diese Funktionen sind jetzt "top-level" und können von Flutter aus dem Hintergrund
-// sicher aufgerufen werden.
-
-@pragma('vm:entry-point')
-void notificationTapBackground(NotificationResponse notificationResponse) {
-  // Dieser Handler wird aufgerufen, wenn auf eine Benachrichtigung getippt wird,
-  // während die App im Hintergrund oder beendet ist.
-  debugPrint('🔔 [background_tap] Payload: ${notificationResponse.payload}');
-  // TODO: Hier Logik für die Hintergrundbehandlung einfügen.
-}
-
-void notificationTapForeground(NotificationResponse notificationResponse) {
-  // Dieser Handler wird aufgerufen, wenn auf eine Benachrichtigung getippt wird,
-  // während die App im Vordergrund ist.
-  debugPrint('🔔 [foreground_tap] Payload: ${notificationResponse.payload}');
-  // TODO: Hier Logik für die Vordergrundbehandlung einfügen (z.B. Navigation).
-}
-
+import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PushNotificationService {
-  static final _local = FlutterLocalNotificationsPlugin();
+  // Ersetzen Sie dies mit Ihrer echten OneSignal App ID aus dem Dashboard
+  static const String _oneSignalAppId = '22e51939-e386-42ac-b5d8-c6b67f9982e8';
 
-  /// Diese Methode am App-Start aufrufen (vor dem Ende von runApp).
+  /// Initialisiert OneSignal und registriert das Gerät.
   static Future<void> init() async {
-    // 1️⃣ Lokale Benachrichtigungen initialisieren
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosSettings = DarwinInitializationSettings();
-    await _local.initialize(
-      const InitializationSettings(
-        android: androidSettings,
-        iOS: iosSettings,
-      ),
-      
-      // --- KORREKTUR 2: Referenziert jetzt die Top-Level-Funktionen ---
-      onDidReceiveNotificationResponse: notificationTapForeground,
-      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
-    );
+    // Nur initialisieren, wenn wir auf einem echten Gerät laufen (nicht im Web)
+    if (kIsWeb) return;
+
+    // Setzt das Log-Level für OneSignal (nützlich für das Debugging)
+    OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
+
+    // Initialisiert den OneSignal-Service
+    OneSignal.initialize(_oneSignalAppId);
+
+    // Fordert die Berechtigung vom Benutzer an, Benachrichtigungen zu senden (wichtig für iOS)
+    // Dies zeigt dem Benutzer beim ersten Start einen Dialog an.
+    OneSignal.Notifications.requestPermission(true);
+
+    // Fügt einen Listener hinzu, um die Player ID zu erhalten, sobald sie verfügbar ist.
+    OneSignal.User.pushSubscription.addObserver((state) {
+      if (state.current.id != null) {
+        debugPrint('OneSignal Player ID: ${state.current.id}');
+        // Sende die neue Player ID an Supabase, sobald wir sie haben
+        _sendPlayerIdToSupabase(state.current.id!);
+      }
+    });
   }
 
-  /// Zeigt eine lokale Benachrichtigung an.
-  static Future<void> showLocalNotification({
-    required int id,
-    required String title,
-    required String body,
-    String? payload, // Optionaler Payload für die Handhabung von Taps
-  }) async {
-    const androidDetails = AndroidNotificationDetails(
-      'uccelli_channel',
-      'Uccelli Notifications',
-      channelDescription: 'Local notifications for Uccelli Society',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-    const iosDetails = DarwinNotificationDetails();
+  /// Speichert die Player ID in der Supabase-Datenbank, um später Benachrichtigungen senden zu können.
+  static Future<void> _sendPlayerIdToSupabase(String playerId) async {
+    if (playerId.isEmpty) return;
 
-    await _local.show(
-      id, // Eindeutige ID für die Benachrichtigung
-      title,
-      body,
-      const NotificationDetails(android: androidDetails, iOS: iosDetails),
-      payload: payload, // Payload kann hier übergeben werden
-    );
-  }
-
-  /// Optional: Methode zum Entfernen aller lokalen Benachrichtigungen
-  static Future<void> cancelAllNotifications() async {
-    await _local.cancelAll();
+    try {
+      // 'upsert' versucht, einen neuen Eintrag zu erstellen.
+      // Da die 'player_id'-Spalte UNIQUE ist, schlägt dies fehl, wenn die ID bereits
+      // existiert, was genau das ist, was wir wollen (keine Duplikate).
+      await Supabase.instance.client.from('player_ids').upsert(
+        {'player_id': playerId},
+        onConflict: 'player_id', // Diese Option sorgt dafür, dass bei einem Konflikt nichts passiert.
+      );
+      debugPrint('Player ID erfolgreich in Supabase gespeichert.');
+    } catch (error) {
+      // Fehler hier sind nicht kritisch für den App-Lauf, aber gut zu wissen.
+      debugPrint('Fehler beim Speichern der Player ID in Supabase: $error');
+    }
   }
 }
